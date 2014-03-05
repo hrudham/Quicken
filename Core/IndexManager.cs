@@ -107,7 +107,12 @@ namespace Core
         /// <returns></returns>
         private static Target BuildTarget(FileInfo shortcutFile)
         {
+            // Note that there is a known issue here: if you building in x86, then run 
+            // this on an x64 system, and find a link that targets an x64 application
+            // in "X:\Program Files\...", it will instead target "X:\Program Files (x86)\...".
+            // Since this path will not exist, you will not be able to find it in the application.
             var shortcut = (IWshRuntimeLibrary.IWshShortcut)_shell.CreateShortcut(shortcutFile.FullName);
+            var workingDirectory = shortcut.WorkingDirectory;
 
             if (File.Exists(shortcut.TargetPath))
             {
