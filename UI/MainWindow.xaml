@@ -49,7 +49,9 @@
             IsManipulationEnabled="True" 
             IsInactiveSelectionHighlightEnabled="True" 
             VerticalAlignment="Center" 
-            CaretBrush="White" Margin="21,16,0,16" >
+            CaretBrush="White" 
+            Margin="21,16,0,16"
+            MaxLength="18">
             <TextBox.SelectionBrush>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"/>
             </TextBox.SelectionBrush>
