@@ -7,8 +7,8 @@
     <ProjectGuid>{043C1B03-FB17-4327-B188-218F6282B829}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Core</RootNamespace>
-    <AssemblyName>Core</AssemblyName>
+    <RootNamespace>Quicken.Core.Index</RootNamespace>
+    <AssemblyName>Quicken.Core.Index</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>

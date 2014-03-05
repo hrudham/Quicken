@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-namespace UI.OperatingSystem.HotKey
+namespace Quicken.UI.OperatingSystem.HotKey
 {
     /// <summary>
     /// Code largely based upon this Stackoverflow answer, although fairly modified: 

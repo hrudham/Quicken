@@ -1,11 +1,6 @@
-﻿using Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Quicken.Core.Index.Entities;
 
-namespace Core.Repositories.Base
+namespace Quicken.Core.Index.Repositories.Base
 {
     internal abstract class RepositoryBase
     {

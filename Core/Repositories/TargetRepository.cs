@@ -1,13 +1,13 @@
-﻿using Core.Entities;
-using Core.Entities.Models;
-using Core.Repositories.Base;
+﻿using Quicken.Core.Index.Entities;
+using Quicken.Core.Index.Entities.Models;
+using Quicken.Core.Index.Repositories.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Repositories
+namespace Quicken.Core.Index.Repositories
 {
     internal class TargetRepository : RepositoryBase
     {

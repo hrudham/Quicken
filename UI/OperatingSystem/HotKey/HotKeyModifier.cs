@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UI.OperatingSystem
+namespace Quicken.UI.OperatingSystem
 {
     [Flags]
     public enum KeyModifier

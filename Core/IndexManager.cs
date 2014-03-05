@@ -1,6 +1,6 @@
-﻿using Core.Entities;
-using Core.Entities.Models;
-using Core.Repositories;
+﻿using Quicken.Core.Index.Entities;
+using Quicken.Core.Index.Entities.Models;
+using Quicken.Core.Index.Repositories;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core
+namespace Quicken.Core.Index
 {
     public class IndexManager
     {

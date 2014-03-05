@@ -1,5 +1,5 @@
-﻿using Core;
-using Core.Entities;
+﻿using Quicken.Core.Index;
+using Quicken.Core.Index.Entities;
 using Hardcodet.Wpf.TaskbarNotification;
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,10 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using UI.OperatingSystem;
-using UI.OperatingSystem.HotKey;
+using Quicken.UI.OperatingSystem;
+using Quicken.UI.OperatingSystem.HotKey;
 
-namespace UI
+namespace Quicken.UI
 {
     /// <summary>
     /// Interaction logic for App.xaml

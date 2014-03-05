@@ -7,7 +7,7 @@
     <ProjectGuid>{8E6FAC14-17B5-49CA-B50C-DAAF70680234}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UI</RootNamespace>
+    <RootNamespace>Quicken.UI</RootNamespace>
     <AssemblyName>Quicken</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -25,7 +25,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ProductName>Quicken</ProductName>
-    <ApplicationRevision>10</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -51,7 +51,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>UI.App</StartupObject>
+    <StartupObject>Quicken.UI.App</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>quicken.ico</ApplicationIcon>
@@ -211,9 +211,9 @@
     <Resource Include="quicken.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
+    <ProjectReference Include="..\Core\Core.Index.csproj">
       <Project>{043c1b03-fb17-4327-b188-218f6282b829}</Project>
-      <Name>Core</Name>
+      <Name>Core.Index</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿using Core.Entities.Models;
+﻿using Quicken.Core.Index.Entities.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Entities
+namespace Quicken.Core.Index.Entities
 {
     internal class DataContext : DbContext
     {

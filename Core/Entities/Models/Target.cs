@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Entities.Models
+namespace Quicken.Core.Index.Entities.Models
 {
     public class Target
     {

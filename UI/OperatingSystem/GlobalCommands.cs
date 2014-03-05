@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace UI.OperatingSystem
+namespace Quicken.UI.OperatingSystem
 {
     internal static class GlobalCommands
     {

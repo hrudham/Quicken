@@ -10,7 +10,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 
-namespace UI.OperatingSystem
+namespace Quicken.UI.OperatingSystem
 {
     /// <summary>
     /// Allows controls other than the title-bar to be clicked on in order to drag the window to a new location.

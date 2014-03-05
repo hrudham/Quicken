@@ -1,18 +1,15 @@
-﻿using Core;
+﻿using Quicken.Core.Index;
+using Quicken.Core.Index.Entities.Models;
+using Quicken.UI.OperatingSystem;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using UI.OperatingSystem;
-using System.Linq;
-using Core.Entities;
-using System.Windows.Media;
-using System.IO;
 using System.Windows.Media.Imaging;
-using System.Diagnostics;
-using System.Security.Principal;
-using Core.Entities.Models;
-using System.Collections.Generic;
 
-namespace UI
+namespace Quicken.UI
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
