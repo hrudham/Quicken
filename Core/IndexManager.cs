@@ -1,4 +1,5 @@
-﻿using Quicken.Core.Index.Entities;
+﻿using Core.Lnk;
+using Quicken.Core.Index.Entities;
 using Quicken.Core.Index.Entities.Models;
 using Quicken.Core.Index.Repositories;
 using System;
@@ -113,6 +114,13 @@ namespace Quicken.Core.Index
             // Since this path will not exist, you will not be able to find it in the application.
             var shortcut = (IWshRuntimeLibrary.IWshShortcut)_shell.CreateShortcut(shortcutFile.FullName);
             var workingDirectory = shortcut.WorkingDirectory;
+
+            var lnkInfo = new LnkInfo(shortcutFile.FullName);
+
+            if (!File.Exists(lnkInfo.TargetPath))
+            {
+                throw new Exception("Does not exist");
+            }
 
             if (File.Exists(shortcut.TargetPath))
             {
