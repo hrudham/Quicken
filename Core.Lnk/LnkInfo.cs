@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Core.Lnk.Extensions;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Core.Lnk
 {
@@ -22,9 +24,13 @@ namespace Core.Lnk
     public class LnkInfo
     {
         #region Fields
+
+        private static IntPtr NullPointer = default(IntPtr);
+
+        [DllImport("Shell32.dll", EntryPoint = "ExtractIconExW", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
+        private static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
         
         private int _flags;
-        private int _iconIndex;
 
         #endregion
 
@@ -34,15 +40,15 @@ namespace Core.Lnk
         public string TargetPath { get; private set; }
         public string Name { get; set; }
         public string Comment { get; set; }
-        public string IconLocation { get; set; }
         public string RelativePath { get; set; }
+        public byte[] IconData { get; set; }
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LnkInfo"/> class.
+        /// Initializes a new instance of the <see cref="LnkInfo" /> class.
         /// </summary>
         /// <param name="path">The path.</param>
         public LnkInfo(string path)
@@ -54,20 +60,23 @@ namespace Core.Lnk
             {
                 using (var binaryReader = new BinaryReader(fileStream))
                 {
+                    var targetPath = default(string);
+                    var iconPath = default(string);
+
                     // Read the lnk flags.
                     fileStream.Seek(0x14, SeekOrigin.Begin);
                     this._flags = binaryReader.ReadInt32();
 
-                    var flagEncoding = this.CheckFlag(LnkFlags.IsUnicode) ? Encoding.Unicode : Encoding.Default;
+                    var flagEncoding = this.CheckFlag(Flags.IsUnicode) ? Encoding.Unicode : Encoding.Default;
 
                     // Read the icon index.
                     fileStream.Seek(0x38, SeekOrigin.Begin);
-                    this._iconIndex = binaryReader.ReadInt32();
+                    var iconIndex = binaryReader.ReadInt32();
 
                     fileStream.Seek(0x4C, SeekOrigin.Begin);
 
                     // Read link target ID list section
-                    if (this.CheckFlag(LnkFlags.HasLinkTargetIDList))
+                    if (this.CheckFlag(Flags.HasLinkTargetIDList))
                     {
                         short idListSize = binaryReader.ReadInt16();
 
@@ -79,13 +88,13 @@ namespace Core.Lnk
                     }
 
                     // Read link info section
-                    if (this.CheckFlag(LnkFlags.HasLinkInfo))
+                    if (this.CheckFlag(Flags.HasLinkInfo))
                     {
                         var infoSectionOffset = binaryReader.BaseStream.Position;
 
                         var linkInfoSize = binaryReader.ReadInt32();
                         var linkInfoHeaderSize = binaryReader.ReadInt32();
-                        var linkInfoFlags = (LnkInfoFlags)(binaryReader.ReadInt32());
+                        var linkInfoFlags = (InfoFlags)(binaryReader.ReadInt32());
 
                         fileStream.Seek(0x04, SeekOrigin.Current);
 
@@ -104,7 +113,7 @@ namespace Core.Lnk
                             commonPathSuffixOffsetUnicode = binaryReader.ReadInt32();
                         }
                             
-                        if ((linkInfoFlags & LnkInfoFlags.VolumeIDAndLocalBasePath) > 0)
+                        if ((linkInfoFlags & InfoFlags.VolumeIDAndLocalBasePath) > 0)
                         {
                             fileStream.Seek(
                                 infoSectionOffset + (localBasePathOffsetUnicode.HasValue ? localBasePathOffsetUnicode.Value : localBasePathOffset),
@@ -120,40 +129,40 @@ namespace Core.Lnk
                             var commonPathSuffix = binaryReader.ReadStringNullTerminated(
                                 commonPathSuffixOffsetUnicode.HasValue ? Encoding.Unicode : Encoding.Default);
 
-                            this.TargetPath = System.IO.Path.Combine(localBasePath, commonPathSuffix);
+                            targetPath = System.IO.Path.Combine(localBasePath, commonPathSuffix);
                         }
 
                         fileStream.Seek(infoSectionOffset + linkInfoSize, SeekOrigin.Begin);
                     }
 
                     // Read string data
-                    if (this.CheckFlag(LnkFlags.HasName))
+                    if (this.CheckFlag(Flags.HasName))
                     {
                         this.Comment = binaryReader.ReadStringData(flagEncoding);
                     }
 
-                    if (this.CheckFlag(LnkFlags.HasRelativePath))
+                    if (this.CheckFlag(Flags.HasRelativePath))
                     {
                         this.RelativePath = binaryReader.ReadStringData(flagEncoding);
 
-                        this.TargetPath = System.IO.Path.Combine(
+                        targetPath = System.IO.Path.Combine(
                             System.IO.Path.GetDirectoryName(path), 
                             this.RelativePath);
                     }
 
-                    if (this.CheckFlag(LnkFlags.HasWorkingDir))
+                    if (this.CheckFlag(Flags.HasWorkingDir))
                     {
                         binaryReader.SkipStringData(flagEncoding);
                     }
 
-                    if (this.CheckFlag(LnkFlags.HasArguments))
+                    if (this.CheckFlag(Flags.HasArguments))
                     {
                         binaryReader.SkipStringData(flagEncoding);
                     }
 
-                    if (this.CheckFlag(LnkFlags.HasIconLocation))
+                    if (this.CheckFlag(Flags.HasIconLocation))
                     {
-                        this.IconLocation = binaryReader.ReadStringData(flagEncoding);
+                        iconPath = binaryReader.ReadStringData(flagEncoding);
                     }
 
                     // Must attempt to pull the environment variable data block.
@@ -168,25 +177,85 @@ namespace Core.Lnk
 
                         switch (extraDataBlock.Signature)
                         {
-                            case LnkExtraDataBlockSignature.EnvironmentVariableDataBlock:
+                            case ExtraDataBlockSignature.EnvironmentVariableDataBlock:
                                 {
                                     if (string.IsNullOrEmpty(TargetPath))
                                     {
-                                        if (!string.IsNullOrEmpty(extraDataBlock.ValueUnicode))
-                                        {
-                                            this.TargetPath = Environment.ExpandEnvironmentVariables(extraDataBlock.ValueUnicode);
-                                        }
-                                        else if (!string.IsNullOrEmpty(extraDataBlock.Value))
-                                        {
-                                            this.TargetPath = Environment.ExpandEnvironmentVariables(extraDataBlock.Value);
-                                        }
+                                        targetPath = Environment.ExpandEnvironmentVariables(extraDataBlock.Value);
+                                    }
+                                    break;
+                                }
+                            case ExtraDataBlockSignature.IconEnvironmentDataBlock:
+                                {
+                                    if (string.IsNullOrEmpty(iconPath))
+                                    {
+                                        iconPath = extraDataBlock.Value;
                                     }
                                     break;
                                 }
                         }
                     }
+
+                    targetPath = targetPath != null ? Environment.ExpandEnvironmentVariables(targetPath) : null;
+                    iconPath = iconPath != null ? Environment.ExpandEnvironmentVariables(iconPath) : null;
+
+                    this.TargetPath = targetPath;
+                    this.IconData = ExtractIcon(targetPath, iconPath, iconIndex);
                 }
             }            
+        }
+
+        /// <summary>
+        /// Extracts the icon.
+        /// </summary>
+        /// <param name="targetPath">The target path.</param>
+        /// <param name="iconPath">The file.</param>
+        /// <param name="iconIndex">The number.</param>
+        /// <returns></returns>
+        private static byte[] ExtractIcon(string targetPath, string iconPath, int iconIndex)
+        {
+            // Attempt to extract the icon at the specified index.
+            /*if (File.Exists(iconPath))
+            {
+                if (iconIndex >= 0)
+                {
+                    var iconHandle = default(IntPtr);
+                    var smallIconHandle = default(IntPtr);
+
+                    ExtractIconEx(iconPath, iconIndex, out iconHandle, out smallIconHandle, 1);
+
+                    if (iconHandle != NullPointer)
+                    {
+                        using (MemoryStream iconMemoryStream = new MemoryStream())
+                        {
+                            using (var bitmap = Icon.FromHandle(iconHandle).ToBitmap())
+                            {
+                                bitmap.Save(iconMemoryStream, ImageFormat.Png);
+                                return iconMemoryStream.ToArray();
+                            }
+                        }
+                    }
+                }
+                else if (iconIndex < 0)
+                {
+                    // This is an icon group. This is not implemented yet, and 
+                    // thus falls back to the ExtractAssociatedIcon code below.
+                }
+            }*/
+
+            if (File.Exists(targetPath))
+            {
+                using (MemoryStream iconMemoryStream = new MemoryStream())
+                {
+                    using (var bitmap = Icon.ExtractAssociatedIcon(targetPath).ToBitmap())
+                    {
+                        bitmap.Save(iconMemoryStream, ImageFormat.Png);
+                        return iconMemoryStream.ToArray();
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -194,7 +263,7 @@ namespace Core.Lnk
         /// </summary>
         /// <param name="flag">The flag.</param>
         /// <returns></returns>
-        private bool CheckFlag(LnkFlags flag)
+        private bool CheckFlag(Flags flag)
         {
             return (this._flags & (int)flag) > 0;
         }

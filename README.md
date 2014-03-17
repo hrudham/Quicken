@@ -31,9 +31,3 @@ In addition, in order to launch an application as an administrator, you are forc
 *Any other reasons why you wrote this?*
 
 I've never used WPF before; what better way is there to learn it than building a project with it? This is also just a personal project at heart. I quite simply just wanted to do it.
-
-##FAQ
-
-*Quicken does not find some of my x64 applications! What's wrong?*
-
-If you're running the x86 version of Quicken, it will sometimes get the location of x64 applications wrong. This is actually a problem with the Windows IWshRuntimeLibrary, which is used to parse LNK files. The solution: run the x64 version of Quicken.

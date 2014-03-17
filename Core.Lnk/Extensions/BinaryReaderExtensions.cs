@@ -64,16 +64,21 @@ namespace Core.Lnk.Extensions
             binaryReader.BaseStream.Seek(size * encoding.GetByteCount(" "), SeekOrigin.Current);
         }
 
-        private static ExtraDataBlock ReadStringExtraDataBlock(this BinaryReader binaryReader, LnkExtraDataBlockSignature signature)
+        private static ExtraDataBlock ReadStringExtraDataBlock(this BinaryReader binaryReader, ExtraDataBlockSignature signature)
         {
-            var value = binaryReader.ReadExtraDataBlockStringEncoded(Encoding.Default);
-            var valueUnicode = binaryReader.ReadExtraDataBlockStringEncoded(Encoding.Unicode);
+            var defaultValue = binaryReader.ReadExtraDataBlockStringEncoded(Encoding.Default);
+            var unicodeValue = binaryReader.ReadExtraDataBlockStringEncoded(Encoding.Unicode);
+
+            var value = unicodeValue;
+            if (string.IsNullOrEmpty(unicodeValue))
+            {
+                value = defaultValue;
+            }
 
             return new ExtraDataBlock()
             {
                 Signature = signature,
-                Value = value,
-                ValueUnicode = valueUnicode
+                Value = value
             };
         }
 
@@ -90,23 +95,23 @@ namespace Core.Lnk.Extensions
                 return null;
             }
 
-            var signature = (LnkExtraDataBlockSignature)(binaryReader.ReadInt32());
+            var signature = (ExtraDataBlockSignature)(binaryReader.ReadInt32());
 
             var extraDataBlock = default(ExtraDataBlock);
 
             switch (signature)
             {
                 // Raw
-                case LnkExtraDataBlockSignature.UnknownDataBlock:
-                case LnkExtraDataBlockSignature.ConsoleDataBlock:
-                case LnkExtraDataBlockSignature.ConsoleFEDataBlock:
-                case LnkExtraDataBlockSignature.PropertyStoreDataBlock:
-                case LnkExtraDataBlockSignature.ShimDataBlock:
-                case LnkExtraDataBlockSignature.TrackerDataBlock:
-                case LnkExtraDataBlockSignature.VistaAndAboveIDListDataBlock:
+                case ExtraDataBlockSignature.UnknownDataBlock:
+                case ExtraDataBlockSignature.ConsoleDataBlock:
+                case ExtraDataBlockSignature.ConsoleFEDataBlock:
+                case ExtraDataBlockSignature.PropertyStoreDataBlock:
+                case ExtraDataBlockSignature.ShimDataBlock:
+                case ExtraDataBlockSignature.TrackerDataBlock:
+                case ExtraDataBlockSignature.VistaAndAboveIDListDataBlock:
                 // Base Folder ID
-                case LnkExtraDataBlockSignature.KnownFolderDataBlock:
-                case LnkExtraDataBlockSignature.SpecialFolderDataBlock:
+                case ExtraDataBlockSignature.KnownFolderDataBlock:
+                case ExtraDataBlockSignature.SpecialFolderDataBlock:
                     {
                         // Skip reading these extra data blocks.
                         binaryReader.BaseStream.Seek(blockSize - Marshal.SizeOf(blockSize) - Marshal.SizeOf(typeof(int)), SeekOrigin.Current);
@@ -117,9 +122,9 @@ namespace Core.Lnk.Extensions
                         break;
                     }
                 // String
-                case LnkExtraDataBlockSignature.DarwinDataBlock:
-                case LnkExtraDataBlockSignature.EnvironmentVariableDataBlock:
-                case LnkExtraDataBlockSignature.IconEnvironmentDataBlock:
+                case ExtraDataBlockSignature.DarwinDataBlock:
+                case ExtraDataBlockSignature.EnvironmentVariableDataBlock:
+                case ExtraDataBlockSignature.IconEnvironmentDataBlock:
                     {
                         extraDataBlock = binaryReader.ReadStringExtraDataBlock(signature);
                         break;

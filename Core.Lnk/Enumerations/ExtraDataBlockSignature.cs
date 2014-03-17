@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Core.Lnk.Enumerations
 {
-    public enum LnkExtraDataBlockSignature : uint
+    public enum ExtraDataBlockSignature : uint
     {
         UnknownDataBlock = 0,
         ConsoleDataBlock = 0xA0000002,

@@ -108,46 +108,21 @@ namespace Quicken.Core.Index
         /// <returns></returns>
         private static Target BuildTarget(FileInfo shortcutFile)
         {
-            // Note that there is a known issue here: if you building in x86, then run 
-            // this on an x64 system, and find a link that targets an x64 application
-            // in "X:\Program Files\...", it will instead target "X:\Program Files (x86)\...".
-            // Since this path will not exist, you will not be able to find it in the application.
-            var shortcut = (IWshRuntimeLibrary.IWshShortcut)_shell.CreateShortcut(shortcutFile.FullName);
-            var workingDirectory = shortcut.WorkingDirectory;
-
             var lnkInfo = new LnkInfo(shortcutFile.FullName);
 
-            if (!File.Exists(lnkInfo.TargetPath))
+            if (File.Exists(lnkInfo.TargetPath))
             {
-                throw new Exception("Does not exist");
-            }
-
-            if (File.Exists(shortcut.TargetPath))
-            {
-                var name = shortcutFile.Name.Replace(shortcutFile.Extension, string.Empty);
-
                 // Extract the product name
-                FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(shortcut.TargetPath);
+                FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(lnkInfo.TargetPath);
                 var productName = versionInfo.ProductName ?? string.Empty;
-
-                // Extract the icon
-                byte[] icon = null;
-                using (MemoryStream iconMemoryStream = new MemoryStream())
-                {
-                    using (var bitmap = Icon.ExtractAssociatedIcon(shortcutFile.FullName).ToBitmap())
-                    {
-                        bitmap.Save(iconMemoryStream, ImageFormat.Png);
-                        icon = iconMemoryStream.ToArray();
-                    }
-                }
 
                 return
                     new Target()
                     {
-                        Name = name,
+                        Name = lnkInfo.Name,
                         ProductName = productName,
                         Path = shortcutFile.FullName,
-                        Icon = icon
+                        Icon = lnkInfo.IconData
                     };
             }
 

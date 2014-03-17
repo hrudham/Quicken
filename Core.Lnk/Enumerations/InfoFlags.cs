@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 namespace Core.Lnk.Enumerations
 {
     [Flags]
-    public enum LnkInfoFlags : uint
+    public enum InfoFlags : uint
     {
         None = 0,
         VolumeIDAndLocalBasePath = 1,

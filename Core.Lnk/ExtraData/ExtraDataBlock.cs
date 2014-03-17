@@ -9,8 +9,7 @@ namespace Core.Lnk.ExtraData
 {
     internal class ExtraDataBlock 
     {
-        public LnkExtraDataBlockSignature Signature { get; set; }
+        public ExtraDataBlockSignature Signature { get; set; }
         public string Value { get; set; }
-        public string ValueUnicode { get; set; }
     }
 }
