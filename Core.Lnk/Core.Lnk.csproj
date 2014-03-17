@@ -77,7 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enumerations\ExtraDataBlockSignature.cs" />
-    <Compile Include="Enumerations\Flags.cs" />
+    <Compile Include="Enumerations\LinkFlags.cs" />
     <Compile Include="Enumerations\InfoFlags.cs" />
     <Compile Include="Extensions\BinaryReaderExtensions.cs" />
     <Compile Include="ExtraData\ExtraDataBlock.cs" />

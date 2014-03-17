@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 namespace Core.Lnk.Enumerations
 {
     [Flags]
-    public enum Flags : uint
+    public enum LinkFlags : uint
     {
         None = 0,
         HasLinkTargetIDList = 1,

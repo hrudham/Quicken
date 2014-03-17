@@ -187,6 +187,11 @@ namespace Quicken.UI
         /// </summary>
         public void Display()
         {
+            // Re-center the application every time it's shown, and make sure it's always on the primary screen.
+            // If we just use the Window's start up position, it sometimes ends up on secondary screens.
+            this.Left = (SystemParameters.PrimaryScreenWidth / 2) - (this.Width / 2);
+            this.Top = (SystemParameters.PrimaryScreenHeight / 2) - (this.Height / 2);
+
             if (!this.IsVisible)
             {
                 this.SearchTextBox.Clear();

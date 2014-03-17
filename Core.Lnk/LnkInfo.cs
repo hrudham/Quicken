@@ -67,7 +67,7 @@ namespace Core.Lnk
                     fileStream.Seek(0x14, SeekOrigin.Begin);
                     this._flags = binaryReader.ReadInt32();
 
-                    var flagEncoding = this.CheckFlag(Flags.IsUnicode) ? Encoding.Unicode : Encoding.Default;
+                    var flagEncoding = this.CheckFlag(LinkFlags.IsUnicode) ? Encoding.Unicode : Encoding.Default;
 
                     // Read the icon index.
                     fileStream.Seek(0x38, SeekOrigin.Begin);
@@ -76,7 +76,7 @@ namespace Core.Lnk
                     fileStream.Seek(0x4C, SeekOrigin.Begin);
 
                     // Read link target ID list section
-                    if (this.CheckFlag(Flags.HasLinkTargetIDList))
+                    if (this.CheckFlag(LinkFlags.HasLinkTargetIDList))
                     {
                         short idListSize = binaryReader.ReadInt16();
 
@@ -88,7 +88,7 @@ namespace Core.Lnk
                     }
 
                     // Read link info section
-                    if (this.CheckFlag(Flags.HasLinkInfo))
+                    if (this.CheckFlag(LinkFlags.HasLinkInfo))
                     {
                         var infoSectionOffset = binaryReader.BaseStream.Position;
 
@@ -136,12 +136,12 @@ namespace Core.Lnk
                     }
 
                     // Read string data
-                    if (this.CheckFlag(Flags.HasName))
+                    if (this.CheckFlag(LinkFlags.HasName))
                     {
                         this.Comment = binaryReader.ReadStringData(flagEncoding);
                     }
 
-                    if (this.CheckFlag(Flags.HasRelativePath))
+                    if (this.CheckFlag(LinkFlags.HasRelativePath))
                     {
                         this.RelativePath = binaryReader.ReadStringData(flagEncoding);
 
@@ -150,17 +150,17 @@ namespace Core.Lnk
                             this.RelativePath);
                     }
 
-                    if (this.CheckFlag(Flags.HasWorkingDir))
+                    if (this.CheckFlag(LinkFlags.HasWorkingDir))
                     {
                         binaryReader.SkipStringData(flagEncoding);
                     }
 
-                    if (this.CheckFlag(Flags.HasArguments))
+                    if (this.CheckFlag(LinkFlags.HasArguments))
                     {
                         binaryReader.SkipStringData(flagEncoding);
                     }
 
-                    if (this.CheckFlag(Flags.HasIconLocation))
+                    if (this.CheckFlag(LinkFlags.HasIconLocation))
                     {
                         iconPath = binaryReader.ReadStringData(flagEncoding);
                     }
@@ -263,7 +263,7 @@ namespace Core.Lnk
         /// </summary>
         /// <param name="flag">The flag.</param>
         /// <returns></returns>
-        private bool CheckFlag(Flags flag)
+        private bool CheckFlag(LinkFlags flag)
         {
             return (this._flags & (int)flag) > 0;
         }
