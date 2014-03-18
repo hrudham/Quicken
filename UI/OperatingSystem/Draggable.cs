@@ -18,14 +18,24 @@ namespace Quicken.UI.OperatingSystem
     /// </summary>
     internal static class Draggable
     {
+        #region Fields
+
         private const int WM_NCLBUTTONDOWN = 0xA1;
-        private const int HT_CAPTION = 0x2;
+        private const int HT_CAPTION = 0x2; 
+
+        #endregion
+
+        #region Unmanaged Methods
 
         [DllImportAttribute("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 
         [DllImportAttribute("user32.dll")]
-        private static extern bool ReleaseCapture();
+        private static extern bool ReleaseCapture(); 
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Registers the window such that it can be dragged via it's body rather than the title bar.
@@ -75,6 +85,8 @@ namespace Quicken.UI.OperatingSystem
                     }
                 };
             }
-        }
+        } 
+
+        #endregion
     }
 }

@@ -31,3 +31,9 @@ In addition, in order to launch an application as an administrator, you are forc
 *Any other reasons why you wrote this?*
 
 I've never used WPF before; what better way is there to learn it than building a project with it? This is also just a personal project at heart. I quite simply just wanted to do it.
+
+##FAQ
+
+*I can't run x64 applications! What's wrong?*
+
+You probably have the x86 version of Quicken installed; install the x64 version instead to fix this.

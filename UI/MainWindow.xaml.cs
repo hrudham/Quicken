@@ -1,10 +1,13 @@
 ﻿using Quicken.Core.Index;
 using Quicken.Core.Index.Entities.Models;
 using Quicken.UI.OperatingSystem;
+using Quicken.UI.OperatingSystem.Launcher;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -17,7 +20,7 @@ namespace Quicken.UI
     public partial class MainWindow : Window
     {
         #region Fields
-
+        
         private IndexManager _indexManager = new IndexManager();
         private IList<Target> _currentTargets = new List<Target>();
         public bool _runAsAdministrator = false;
@@ -170,15 +173,7 @@ namespace Quicken.UI
 
                 this._indexManager.UpdateTermTarget(target.TargetId, this.SearchTextBox.Text);
 
-                var process = new Process();
-                process.StartInfo.FileName = target.Path;
-
-                if (runAsAdministrator)
-                {
-                    process.StartInfo.Verb = "runas";
-                }
-
-                process.Start();
+                ShellLauncher.Start(target.Path, runAsAdministrator);
             }
         }
 

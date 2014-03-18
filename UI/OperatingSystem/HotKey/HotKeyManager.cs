@@ -19,13 +19,17 @@ namespace Quicken.UI.OperatingSystem.HotKey
 
         private static IDictionary<int, HotKeyBinding> _bindings;
 
+        public const int WmHotKey = 0x0312;
+
+        #endregion
+
+        #region Unmanaged Methods
+
         [DllImport("user32.dll")]
         private static extern bool RegisterHotKey(IntPtr hWnd, int id, UInt32 fsModifiers, UInt32 vlc);
 
         [DllImport("user32.dll")]
-        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
-
-        public const int WmHotKey = 0x0312;
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id); 
 
         #endregion
 

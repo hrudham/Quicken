@@ -26,11 +26,15 @@ namespace Core.Lnk
         #region Fields
 
         private static IntPtr NullPointer = default(IntPtr);
+        
+        private int _flags;
+
+        #endregion
+
+        #region Unmanaged Methods
 
         [DllImport("Shell32.dll", EntryPoint = "ExtractIconExW", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
         private static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
-        
-        private int _flags;
 
         #endregion
 

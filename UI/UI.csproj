@@ -25,7 +25,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ProductName>Quicken</ProductName>
-    <ApplicationRevision>12</ApplicationRevision>
+    <ApplicationRevision>14</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -153,11 +153,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extensions\EnumerationExtensions.cs" />
+    <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="OperatingSystem\Draggable.cs" />
     <Compile Include="OperatingSystem\GlobalCommands.cs" />
     <Compile Include="OperatingSystem\HotKey\HotKeyBinding.cs" />
     <Compile Include="OperatingSystem\HotKey\HotKeyManager.cs" />
     <Compile Include="OperatingSystem\HotKey\HotKeyModifier.cs" />
+    <Compile Include="OperatingSystem\Launcher\Enumerations\ShowCommands.cs" />
+    <Compile Include="OperatingSystem\Launcher\Enumerations\Verbs.cs" />
+    <Compile Include="OperatingSystem\Launcher\ShellLauncher.cs" />
+    <Compile Include="OperatingSystem\Launcher\ShellExecuteInfo.cs" />
     <Compile Include="OperatingSystem\SystemTrayController.cs" />
     <Compile Include="OperatingSystem\DelegateCommand.cs" />
     <Page Include="MainWindow.xaml">
