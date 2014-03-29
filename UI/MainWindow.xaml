@@ -31,7 +31,7 @@
         <TextBox 
             HorizontalAlignment="Left" 
             Height="48"
-            Width="164"
+            Width="127"
             FontFamily="Verdana"
             FontSize="14" 
             Padding="8px 0px"
@@ -58,8 +58,8 @@
         </TextBox>
         <Label 
             HorizontalAlignment="Left" 
-            Margin="232,20,0,37" 
-            Width="262" 
+            Margin="190,20,0,37" 
+            Width="287" 
             Padding="2" 
             FontFamily="Calibri" 
             FontSize="16" 
@@ -74,9 +74,9 @@
         </Label>
         <Label 
             HorizontalAlignment="Left" 
-            Margin="232,41,0,0" 
+            Margin="190,41,0,0" 
             VerticalAlignment="Top" 
-            Width="262" 
+            Width="287" 
             Padding="2" 
             FontFamily="Calibri" 
             VerticalContentAlignment="Center"
@@ -93,12 +93,12 @@
             Name="TargetIconImage" 
             Height="32"
             Width="32" 
-            Source="quicken.ico" Margin="190,24,278,24" />
+            Source="quicken.ico" Margin="153,24,315,24" />
         <Image 
             Name="RunAsAdministratorImage"
             HorizontalAlignment="Left" 
             Width="16"
             Height="16" 
-            Source="Images/run-as-administrator.png" Margin="184,18,0,46" />
+            Source="Images/run-as-administrator.png" Margin="147,18,0,46" />
     </Grid>
 </Window>

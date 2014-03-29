@@ -125,6 +125,17 @@ namespace Quicken.Core.Index
                         Icon = lnkInfo.IconData
                     };
             }
+            else if (Directory.Exists(lnkInfo.TargetPath))
+            {
+                return
+                    new Target()
+                    {
+                        Name = lnkInfo.Name,
+                        ProductName = shortcutFile.FullName,
+                        Path = shortcutFile.FullName,
+                        Icon = lnkInfo.IconData
+                    };
+            }
 
             return null;
         }

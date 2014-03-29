@@ -42,10 +42,11 @@ namespace Core.Lnk
 
         public string Path { get; private set; }
         public string TargetPath { get; private set; }
-        public string Name { get; set; }
-        public string Comment { get; set; }
-        public string RelativePath { get; set; }
-        public byte[] IconData { get; set; }
+        public string Name { get; private set; }
+        public string Comment { get; private set; }
+        public string RelativePath { get; private set; }
+        public byte[] IconData { get; private set; }
+        public FileAttributes FileAttributes { get; private set; }
 
         #endregion
 
@@ -70,9 +71,12 @@ namespace Core.Lnk
                     // Read the lnk flags.
                     fileStream.Seek(0x14, SeekOrigin.Begin);
                     this._flags = binaryReader.ReadInt32();
-
                     var flagEncoding = this.CheckFlag(LinkFlags.IsUnicode) ? Encoding.Unicode : Encoding.Default;
 
+                    // Read the file attributes
+                    fileStream.Seek(0x18, SeekOrigin.Begin);
+                    this.FileAttributes = (FileAttributes)binaryReader.ReadInt32();
+                    
                     // Read the icon index.
                     fileStream.Seek(0x38, SeekOrigin.Begin);
                     var iconIndex = binaryReader.ReadInt32();
@@ -204,62 +208,10 @@ namespace Core.Lnk
                     iconPath = iconPath != null ? Environment.ExpandEnvironmentVariables(iconPath) : null;
 
                     this.TargetPath = targetPath;
-                    this.IconData = ExtractIcon(targetPath, iconPath, iconIndex);
+
+                    this.IconData = IconExtractor.ExtractFileIcon(targetPath, iconPath, iconIndex);
                 }
             }            
-        }
-
-        /// <summary>
-        /// Extracts the icon.
-        /// </summary>
-        /// <param name="targetPath">The target path.</param>
-        /// <param name="iconPath">The file.</param>
-        /// <param name="iconIndex">The number.</param>
-        /// <returns></returns>
-        private static byte[] ExtractIcon(string targetPath, string iconPath, int iconIndex)
-        {
-            // Attempt to extract the icon at the specified index.
-            /*if (File.Exists(iconPath))
-            {
-                if (iconIndex >= 0)
-                {
-                    var iconHandle = default(IntPtr);
-                    var smallIconHandle = default(IntPtr);
-
-                    ExtractIconEx(iconPath, iconIndex, out iconHandle, out smallIconHandle, 1);
-
-                    if (iconHandle != NullPointer)
-                    {
-                        using (MemoryStream iconMemoryStream = new MemoryStream())
-                        {
-                            using (var bitmap = Icon.FromHandle(iconHandle).ToBitmap())
-                            {
-                                bitmap.Save(iconMemoryStream, ImageFormat.Png);
-                                return iconMemoryStream.ToArray();
-                            }
-                        }
-                    }
-                }
-                else if (iconIndex < 0)
-                {
-                    // This is an icon group. This is not implemented yet, and 
-                    // thus falls back to the ExtractAssociatedIcon code below.
-                }
-            }*/
-
-            if (File.Exists(targetPath))
-            {
-                using (MemoryStream iconMemoryStream = new MemoryStream())
-                {
-                    using (var bitmap = Icon.ExtractAssociatedIcon(targetPath).ToBitmap())
-                    {
-                        bitmap.Save(iconMemoryStream, ImageFormat.Png);
-                        return iconMemoryStream.ToArray();
-                    }
-                }
-            }
-
-            return null;
         }
 
         /// <summary>

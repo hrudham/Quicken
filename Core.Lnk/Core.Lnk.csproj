@@ -80,7 +80,9 @@
     <Compile Include="Enumerations\LinkFlags.cs" />
     <Compile Include="Enumerations\InfoFlags.cs" />
     <Compile Include="Extensions\BinaryReaderExtensions.cs" />
+    <Compile Include="Extensions\IconExtensions.cs" />
     <Compile Include="ExtraData\ExtraDataBlock.cs" />
+    <Compile Include="IconExtractor.cs" />
     <Compile Include="LnkInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
