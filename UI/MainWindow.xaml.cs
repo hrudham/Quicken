@@ -219,7 +219,7 @@ namespace Quicken.UI
             if (target != null)
             {
                 this.TargetNameTextBlock.Text = target.Name;
-                this.TargetProductNameTextBlock.Text = target.ProductName;
+                this.TargetProductNameTextBlock.Text = target.Description;
 
                 // Render the icon
                 this.TargetIconImage.Source = null;

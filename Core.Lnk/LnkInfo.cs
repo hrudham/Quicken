@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using Core.Lnk.Extensions;
 using System.Drawing;
 using System.Drawing.Imaging;
+using Core.Icons;
+using System.Xml.Linq;
+using System.Diagnostics;
 
 namespace Core.Lnk
 {
@@ -25,25 +28,16 @@ namespace Core.Lnk
     {
         #region Fields
 
-        private static IntPtr NullPointer = default(IntPtr);
-        
         private int _flags;
 
         #endregion
-
-        #region Unmanaged Methods
-
-        [DllImport("Shell32.dll", EntryPoint = "ExtractIconExW", CharSet = CharSet.Unicode, ExactSpelling = true, CallingConvention = CallingConvention.StdCall)]
-        private static extern int ExtractIconEx(string sFile, int iIndex, out IntPtr piLargeVersion, out IntPtr piSmallVersion, int amountIcons);
-
-        #endregion
-
+        
         #region Properties
 
         public string Path { get; private set; }
         public string TargetPath { get; private set; }
         public string Name { get; private set; }
-        public string Comment { get; private set; }
+        public string Description { get; private set; }
         public string RelativePath { get; private set; }
         public byte[] IconData { get; private set; }
         public FileAttributes FileAttributes { get; private set; }
@@ -146,7 +140,7 @@ namespace Core.Lnk
                     // Read string data
                     if (this.CheckFlag(LinkFlags.HasName))
                     {
-                        this.Comment = binaryReader.ReadStringData(flagEncoding);
+                        binaryReader.SkipStringData(flagEncoding);
                     }
 
                     if (this.CheckFlag(LinkFlags.HasRelativePath))
@@ -204,14 +198,82 @@ namespace Core.Lnk
                         }
                     }
 
-                    targetPath = targetPath != null ? Environment.ExpandEnvironmentVariables(targetPath) : null;
-                    iconPath = iconPath != null ? Environment.ExpandEnvironmentVariables(iconPath) : null;
+                    targetPath = string.IsNullOrEmpty(targetPath) ? null : Environment.ExpandEnvironmentVariables(targetPath);
+                    iconPath = string.IsNullOrEmpty(iconPath) ? null : Environment.ExpandEnvironmentVariables(iconPath);
 
                     this.TargetPath = targetPath;
 
-                    this.IconData = IconExtractor.ExtractFileIcon(targetPath, iconPath, iconIndex);
+                    this.IconData = GetIcon(
+                        string.IsNullOrEmpty(iconPath) ? targetPath : iconPath,
+                        iconIndex);
+
+                    this.Description = GetDescription(targetPath);
                 }
             }            
+        }
+
+        /// <summary>
+        /// Gets the description.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        private static string GetDescription(string path)
+        {
+            var description = string.Empty;
+
+            if (File.Exists(path))
+            {
+                switch (System.IO.Path.GetExtension(path))
+                {
+                    case ".library-ms":
+                        description = "Library";
+                        break;
+                    default:
+                        // Extract the product name as the description
+                        FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(path);
+                        description = versionInfo.ProductName ?? string.Empty;
+                        break;
+                }
+            }
+            else if (Directory.Exists(path))
+            {
+                description = path;
+            }
+
+            return description;
+        }
+
+        /// <summary>
+        /// Gets the icon.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        private static byte[] GetIcon(string path, int index)
+        {
+            var result = default(byte[]);
+
+            if (path != null)
+            {
+                if (File.Exists(path))
+                {
+                    switch (System.IO.Path.GetExtension(path))
+                    {
+                        case ".library-ms":
+                            result = IconExtractor.GetLibraryIcon(path);
+                            break;
+                        default:
+                            result = IconExtractor.GetFileIcon(path, index);
+                            break;
+                    }
+                }
+                else if (Directory.Exists(path))
+                {
+                    result = IconExtractor.GetDirectoryOrDeviceIcon(path);
+                }
+            }
+
+            return result;
         }
 
         /// <summary>

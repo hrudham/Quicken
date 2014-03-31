@@ -44,7 +44,7 @@ namespace Quicken.Core.Index.Repositories
                     // though, since that is what we use to find these.
                     item.current.UpdatedDate = DateTime.Now;
                     item.current.Name = item.changed.Name;
-                    item.current.ProductName = item.changed.ProductName;
+                    item.current.Description = item.changed.Description;
                     item.current.Icon = item.changed.Icon;
                 }
             }

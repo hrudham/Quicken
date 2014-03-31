@@ -110,33 +110,18 @@ namespace Quicken.Core.Index
         {
             var lnkInfo = new LnkInfo(shortcutFile.FullName);
 
-            if (File.Exists(lnkInfo.TargetPath))
-            {
-                // Extract the product name
-                FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(lnkInfo.TargetPath);
-                var productName = versionInfo.ProductName ?? string.Empty;
-
-                return
-                    new Target()
-                    {
-                        Name = lnkInfo.Name,
-                        ProductName = productName,
-                        Path = shortcutFile.FullName,
-                        Icon = lnkInfo.IconData
-                    };
-            }
-            else if (Directory.Exists(lnkInfo.TargetPath))
+            if (File.Exists(lnkInfo.TargetPath) || Directory.Exists(lnkInfo.TargetPath))
             {
                 return
-                    new Target()
-                    {
-                        Name = lnkInfo.Name,
-                        ProductName = shortcutFile.FullName,
-                        Path = shortcutFile.FullName,
-                        Icon = lnkInfo.IconData
-                    };
+                   new Target()
+                   {
+                       Name = lnkInfo.Name,
+                       Description = lnkInfo.Description,
+                       Path = shortcutFile.FullName,
+                       Icon = lnkInfo.IconData
+                   };
             }
-
+            
             return null;
         }
 
