@@ -20,7 +20,9 @@ namespace Quicken.UI
     public partial class MainWindow : Window
     {
         #region Fields
-        
+
+        private Thickness _nameLabelWithDescriptionMargin;
+        private Thickness _nameLabelWithoutDescriptionMargin;
         private IndexManager _indexManager = new IndexManager();
         private IList<Target> _currentTargets = new List<Target>();
         public bool _runAsAdministrator = false;
@@ -50,6 +52,12 @@ namespace Quicken.UI
         {
             Draggable.Register(this, MainGrid);
             UpdateRunAsAdministrator();
+            _nameLabelWithDescriptionMargin = this.TargetNameLabel.Margin;
+            _nameLabelWithoutDescriptionMargin = new Thickness(
+                this._nameLabelWithDescriptionMargin.Left,
+                0, 
+                this._nameLabelWithDescriptionMargin.Right, 
+                0);
         }
 
         /// <summary>
@@ -204,7 +212,7 @@ namespace Quicken.UI
         {
             this._currentTargets.Clear();
             this.TargetNameTextBlock.Text = string.Empty;
-            this.TargetProductNameTextBlock.Text = string.Empty;
+            this.TargetDescriptionTextBlock.Text = string.Empty;
             this.TargetIconImage.Source = null;
         }
 
@@ -219,7 +227,16 @@ namespace Quicken.UI
             if (target != null)
             {
                 this.TargetNameTextBlock.Text = target.Name;
-                this.TargetProductNameTextBlock.Text = target.Description;
+                this.TargetDescriptionTextBlock.Text = target.Description;
+
+                if (!string.IsNullOrEmpty(target.Description))
+                {
+                    this.TargetNameLabel.Margin = this._nameLabelWithDescriptionMargin;
+                }
+                else
+                {
+                    this.TargetNameLabel.Margin = this._nameLabelWithoutDescriptionMargin;
+                }
 
                 // Render the icon
                 this.TargetIconImage.Source = null;

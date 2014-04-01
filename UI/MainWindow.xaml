@@ -57,9 +57,10 @@
             </TextBox.SelectionBrush>
         </TextBox>
         <Label 
+            Name="TargetNameLabel"
             HorizontalAlignment="Left" 
-            Margin="190,20,0,37" 
-            Width="287" 
+            Margin="192,20,0,37"
+            Width="285" 
             Padding="2" 
             FontFamily="Calibri" 
             FontSize="16" 
@@ -73,10 +74,11 @@
             </TextBlock>
         </Label>
         <Label 
+            Name="TargetDescriptionLabel"
             HorizontalAlignment="Left" 
-            Margin="190,41,0,0" 
+            Margin="192,41,0,0" 
             VerticalAlignment="Top" 
-            Width="287" 
+            Width="285" 
             Padding="2" 
             FontFamily="Calibri" 
             VerticalContentAlignment="Center"
@@ -84,7 +86,7 @@
             Height="16">
             <TextBlock 
                 TextTrimming="CharacterEllipsis"
-                Name="TargetProductNameTextBlock" 
+                Name="TargetDescriptionTextBlock" 
                 VerticalAlignment="Center">
                 Target Product Name
             </TextBlock>

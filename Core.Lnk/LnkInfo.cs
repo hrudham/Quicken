@@ -140,7 +140,8 @@ namespace Core.Lnk
                     // Read string data
                     if (this.CheckFlag(LinkFlags.HasName))
                     {
-                        binaryReader.SkipStringData(flagEncoding);
+                        var name = binaryReader.ReadStringData(flagEncoding);
+
                     }
 
                     if (this.CheckFlag(LinkFlags.HasRelativePath))
