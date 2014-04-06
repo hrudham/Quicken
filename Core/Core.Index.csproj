@@ -164,6 +164,10 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core.Icons\Core.Icons.csproj">
+      <Project>{ba3a46c1-57ec-4dc3-b062-2e209fc9e369}</Project>
+      <Name>Core.Icons</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Core.Lnk\Core.Lnk.csproj">
       <Project>{5ae03688-fa19-47a2-b1d2-3adbd36da7e7}</Project>
       <Name>Core.Lnk</Name>

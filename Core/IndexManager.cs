@@ -1,4 +1,5 @@
-﻿using Core.Lnk;
+﻿using Core.Icons;
+using Core.Lnk;
 using Quicken.Core.Index.Entities;
 using Quicken.Core.Index.Entities.Models;
 using Quicken.Core.Index.Repositories;
@@ -80,9 +81,31 @@ namespace Quicken.Core.Index
             foreach (var directory in this._directories)
             {
                 // Find all links that point to an executable, and add them to the list of targets.
-                foreach (var file in new DirectoryInfo(directory).GetFiles("*.lnk", SearchOption.AllDirectories))
+                foreach (var file in new DirectoryInfo(directory).GetFiles("*.*", SearchOption.AllDirectories))
                 {
-                    var target = BuildTarget(file);
+                    var target = default(Target);
+
+                    switch (file.Extension.ToUpperInvariant())
+                    {
+                        case ".LNK":
+                            target = GetLnkTarget(file);
+                            break;
+                        case ".URL":
+                            target = GetUrlTarget(file);
+                            break;
+                        default:
+                            {
+                                target = new Target()
+                                    {
+                                        Name = file.Name.Replace(file.Extension, string.Empty),
+                                        Description = GetFileDescription(file.FullName),
+                                        Path = file.FullName,
+                                        Icon = IconExtractor.GetIcon(file.FullName)
+                                    };
+                            }
+                            break;
+                    }
+                    
                     if (target != null)
                     {
                         // Windows is case-insensitive when it comes to paths, and we
@@ -102,24 +125,123 @@ namespace Quicken.Core.Index
         }
 
         /// <summary>
-        /// Builds the target.
+        /// Gets the LNK target.
         /// </summary>
         /// <param name="file">The file.</param>
         /// <returns></returns>
-        private static Target BuildTarget(FileInfo shortcutFile)
+        private static Target GetLnkTarget(FileInfo file)
         {
-            var lnkInfo = new LnkInfo(shortcutFile.FullName);
-
-            return
-                new Target()
+            var lnkInfo = new LnkInfo(file.FullName);
+            return new Target()
                 {
                     Name = lnkInfo.Name,
-                    Description = lnkInfo.Description,
-                    Path = shortcutFile.FullName,
-                    Icon = lnkInfo.IconData
+                    Description = GetFileDescription(lnkInfo.TargetPath),
+                    Path = file.FullName,
+                    Icon = lnkInfo.Icon
                 };
         }
+             
+        /// <summary>
+        /// Gets the URL target.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        /// <returns></returns>
+        private static Target GetUrlTarget(FileInfo file)
+        {
+            using (var streamReader = new StreamReader(file.FullName))
+            {
+                var url = string.Empty;
+                var iconPath = file.FullName;
+                int? iconIndex = null;
 
+                bool foundHeader = false;
+
+                string line = null;
+                while ((line = streamReader.ReadLine()) != null)
+                {
+                    if (!foundHeader)
+                    {
+                        foundHeader = (line == "[InternetShortcut]");
+                    }
+                    else
+                    {
+                        if (line.StartsWith("["))
+                        {
+                            break;
+                        }
+
+                        var firstEquals = line.IndexOf('=');
+                        if (firstEquals >= 0)
+                        {
+                            var key = line.Substring(0, firstEquals);
+                            var value = line.Substring(firstEquals + 1);
+
+                            switch (key)
+                            {
+                                case "URL":
+                                    url = value;
+                                    break;
+                                case "IconIndex":
+                                    int parsedIconIndex = 0;
+                                    if (int.TryParse(value, out parsedIconIndex))
+                                    {
+                                        iconIndex = parsedIconIndex;
+                                    }
+                                    break;
+                                case "IconFile":
+                                    iconPath = value;
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                var icon = IconExtractor.GetIcon(iconPath, iconIndex);
+                                                
+                return new Target()
+                {
+                    Name = file.Name.Replace(file.Extension, string.Empty),
+                    Description = url,
+                    Path = url,
+                    Icon = icon
+                };
+            }
+        }
+
+        /// <summary>
+        /// Gets the description.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        private static string GetFileDescription(string path)
+        {
+            var description = path;
+
+            if (File.Exists(path))
+            {
+                switch (System.IO.Path.GetExtension(path).ToUpperInvariant())
+                {
+                    case ".LIBRARY-MS":
+                        description = "Library";
+                        break;
+                    case ".APPREF-MS":
+                        description = string.Empty;
+                        break;
+                    case ".EXE":
+                        // Extract the product name as the description
+                        FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(path);
+                        description = versionInfo.ProductName ?? string.Empty;
+                        break;
+                }
+            }
+            else if (Directory.Exists(path))
+            {
+                description = path;
+            }
+
+            return description;
+        }
+        
         #endregion
     }
 }

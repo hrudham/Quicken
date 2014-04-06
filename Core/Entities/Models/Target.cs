@@ -23,6 +23,8 @@ namespace Quicken.Core.Index.Entities.Models
 
         public string Description { get; set; }
 
+        [Column(TypeName = "image")]
+        [MaxLength]
         public byte[] Icon { get; set; }
 
         public DateTime UpdatedDate { get; set; }

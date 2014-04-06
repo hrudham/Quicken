@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Core.Icons.Extensions;
+using Core.Icons.Models;
+using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Core.Icons.Extensions;
-using Core.Icons.Models;
 using System.Xml.Linq;
-using System.IO;
-using System.Xml.XPath;
 
 namespace Core.Icons
 {
@@ -17,6 +13,7 @@ namespace Core.Icons
     {
         #region Unmanaged Methods
 
+        // http://msdn.microsoft.com/en-us/library/windows/desktop/ms648069(v=vs.85).aspx
         [DllImport("Shell32", CharSet = CharSet.Auto)]
         private static unsafe extern int ExtractIconEx(
             string lpszFile,
@@ -41,12 +38,68 @@ namespace Core.Icons
         #region Methods
 
         /// <summary>
+        /// Gets the icon.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        public static byte[] GetIcon(string path)
+        {
+            return GetIcon(path, null);
+        }
+
+        /// <summary>
+        /// Gets the icon.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="index">The index.</param>
+        /// <returns></returns>
+        public static byte[] GetIcon(string path, int? index)
+        {
+            var result = default(byte[]);
+
+            if (!index.HasValue)
+            {
+                // If this value is zero, then the unmanaged ExtractIconEx 
+                // function will pull out the first icon.
+                index = 0;
+            }
+
+            if (path != null)
+            {
+                if (File.Exists(path))
+                {
+                    switch (System.IO.Path.GetExtension(path))
+                    {
+                        case ".library-ms":
+                            result = GetLibraryIcon(path);
+                            break;
+                        default:
+                            result = GetFileIcon(path, index.Value);
+                            break;
+                    }
+
+                    if (result == null)
+                    {
+                        // This is the last resort if we really can't find an icon.
+                        result = Icon.ExtractAssociatedIcon(path).ToByteArray();
+                    }
+                }
+                else if (Directory.Exists(path))
+                {
+                    result = GetGenericIcon(path, true);
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Gets the file icon.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="index">The index.</param>
         /// <returns></returns>
-        public static byte[] GetFileIcon(string path, int index)
+        private static byte[] GetFileIcon(string path, int index)
         {
             var iconData = default(byte[]);
             var smallIconHandles = new IntPtr[1] { IntPtr.Zero };
@@ -92,7 +145,7 @@ namespace Core.Icons
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public static byte[] GetLibraryIcon(string path)
+        private static byte[] GetLibraryIcon(string path)
         {
             if (!Path.GetExtension(path).Equals(".library-ms", StringComparison.OrdinalIgnoreCase))
             {
@@ -120,19 +173,19 @@ namespace Core.Icons
                         int.TryParse(ReferenceArray[1], out iconIndex);
                     }
 
-                    return IconExtractor.GetFileIcon(iconPath, iconIndex);
+                    return GetFileIcon(iconPath, iconIndex);
                 }
             }
 
             return null;
         }
-
+        
         /// <summary>
         /// Gets the directory or device icon.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public static byte[] GetDirectoryOrDeviceIcon(string path)
+        private static byte[] GetGenericIcon(string path, bool isDirectoryOrDevice)
         {
             const uint SHGFI_ICON = 0x000000100;
             const uint SHGFI_USEFILEATTRIBUTES = 0x000000010;
@@ -142,19 +195,26 @@ namespace Core.Icons
             const uint FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
 
             // Get the folder icon
-            Icon icon = null;
+            byte[] icon = null;
             var shFileInfo = new ShellFileInfo();
 
             unsafe
             {
                 try
                 {
+                    var flags = SHGFI_ICON | SHGFI_LARGEICON;
+
+                    if (isDirectoryOrDevice)
+                    {
+                        flags = flags | SHGFI_USEFILEATTRIBUTES | SHGFI_OPENICON;
+                    }
+
                     var result = SHGetFileInfo(
                         path,
                         FILE_ATTRIBUTE_DIRECTORY,
                         out shFileInfo,
                         (uint)Marshal.SizeOf(shFileInfo),
-                        SHGFI_ICON | SHGFI_USEFILEATTRIBUTES | SHGFI_OPENICON | SHGFI_LARGEICON);
+                        flags);
 
                     if (result == IntPtr.Zero)
                     {
@@ -164,8 +224,7 @@ namespace Core.Icons
                     // Load the icon from an HICON handle  
                     Icon.FromHandle(shFileInfo.hIcon);
 
-                    // Now clone the icon, so that it can be successfully stored in an ImageList
-                    icon = (Icon)Icon.FromHandle(shFileInfo.hIcon).Clone();
+                    icon = Icon.FromHandle(shFileInfo.hIcon).ToByteArray();
                 }
                 finally
                 {
@@ -174,11 +233,7 @@ namespace Core.Icons
                 }
             }
 
-            // This may look odd, especially when one considers that 
-            // this is a method call on a potentially null object.
-            // However, this is an extension method which therefore 
-            // to have the ability to handle this. 
-            return icon.ToByteArray();
+            return icon;
         }
 
         #endregion

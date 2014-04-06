@@ -29,18 +29,38 @@ namespace Core.Lnk
         #region Fields
 
         private int _flags;
+        private int _iconIndex;
+        private string _iconPath;
+        public byte[] _icon { get; private set; }
 
         #endregion
         
         #region Properties
 
         public string Path { get; private set; }
+
         public string TargetPath { get; private set; }
+
         public string Name { get; private set; }
-        public string Description { get; private set; }
+
         public string RelativePath { get; private set; }
-        public byte[] IconData { get; private set; }
+
         public FileAttributes FileAttributes { get; private set; }
+
+        public byte[] Icon
+        {
+            get
+            {
+                if (this._icon == null)
+                {
+                    this._icon = IconExtractor.GetIcon(
+                        string.IsNullOrEmpty(this._iconPath) ? this.TargetPath : this._iconPath,
+                        this._iconIndex);
+                }
+
+                return this._icon;
+            }
+        }
 
         #endregion
 
@@ -199,84 +219,12 @@ namespace Core.Lnk
                         }
                     }
 
-                    targetPath = string.IsNullOrEmpty(targetPath) ? null : Environment.ExpandEnvironmentVariables(targetPath);
-                    iconPath = string.IsNullOrEmpty(iconPath) ? null : Environment.ExpandEnvironmentVariables(iconPath);
-
-                    this.TargetPath = targetPath;
-
-                    this.IconData = GetIcon(
-                        string.IsNullOrEmpty(iconPath) ? targetPath : iconPath,
-                        iconIndex);
-
-                    this.Description = GetDescription(targetPath);
+                    this._iconPath = string.IsNullOrEmpty(iconPath) ? null : Environment.ExpandEnvironmentVariables(iconPath);
+                    this.TargetPath = string.IsNullOrEmpty(targetPath) ? null : Environment.ExpandEnvironmentVariables(targetPath);
                 }
             }            
         }
-
-        /// <summary>
-        /// Gets the description.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <returns></returns>
-        private static string GetDescription(string path)
-        {
-            var description = string.Empty;
-
-            if (File.Exists(path))
-            {
-                switch (System.IO.Path.GetExtension(path))
-                {
-                    case ".library-ms":
-                        description = "Library";
-                        break;
-                    default:
-                        // Extract the product name as the description
-                        FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(path);
-                        description = versionInfo.ProductName ?? string.Empty;
-                        break;
-                }
-            }
-            else if (Directory.Exists(path))
-            {
-                description = path;
-            }
-
-            return description;
-        }
-
-        /// <summary>
-        /// Gets the icon.
-        /// </summary>
-        /// <param name="path">The path.</param>
-        /// <param name="index">The index.</param>
-        /// <returns></returns>
-        private static byte[] GetIcon(string path, int index)
-        {
-            var result = default(byte[]);
-
-            if (path != null)
-            {
-                if (File.Exists(path))
-                {
-                    switch (System.IO.Path.GetExtension(path))
-                    {
-                        case ".library-ms":
-                            result = IconExtractor.GetLibraryIcon(path);
-                            break;
-                        default:
-                            result = IconExtractor.GetFileIcon(path, index);
-                            break;
-                    }
-                }
-                else if (Directory.Exists(path))
-                {
-                    result = IconExtractor.GetDirectoryOrDeviceIcon(path);
-                }
-            }
-
-            return result;
-        }
-
+        
         /// <summary>
         /// Determines whether the specified flag is flag.
         /// </summary>
