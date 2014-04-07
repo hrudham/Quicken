@@ -1,5 +1,6 @@
 ﻿using Core.Icons.Extensions;
 using Core.Icons.Models;
+using Microsoft.Win32;
 using System;
 using System.Drawing;
 using System.IO;
@@ -137,7 +138,48 @@ namespace Core.Icons
                 }
             }
 
+            if (iconData == null && File.Exists(path))
+            {
+                //TODO: path sometimes returns "%1". We need to handle this somehow.
+
+                // This icon is probably just file that does not have an icon 
+                // explicity associated with it, so attempt to get it's generic
+                // icon as defined by the OS.
+                iconData = GetExtensionIcon(Path.GetExtension(path));
+            }
+
             return iconData;
+        }
+
+        /// <summary>
+        /// Gets the default icon as defined by the Windows registry for the specified extension.
+        /// </summary>
+        /// <param name="extension">The extension.</param>
+        /// <returns></returns>
+        private static byte[] GetExtensionIcon(string extension)
+        {
+            if (!string.IsNullOrEmpty(extension))
+            {
+                var extensionKey = Registry.ClassesRoot.OpenSubKey(extension);
+                if (extensionKey != null)
+                {
+                    var extensionValue = extensionKey.GetValue(string.Empty);
+
+                    if (extensionValue != null)
+                    {
+                        var defaultIconKey = Registry.ClassesRoot.OpenSubKey(
+                            string.Format("{0}\\DefaultIcon", extensionValue));
+
+                        if (defaultIconKey != null)
+                        {
+                            return GetIconFromReference(
+                                defaultIconKey.GetValue(string.Empty) as string);
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -161,20 +203,7 @@ namespace Core.Icons
             {
                 var reference = referenceElement.Value;
 
-                if (!string.IsNullOrEmpty(reference))
-                {
-                    var ReferenceArray = reference.Split(',');
-
-                    var iconPath = ReferenceArray[0];
-                    int iconIndex = 0;
-
-                    if (ReferenceArray.Length > 1)
-                    {
-                        int.TryParse(ReferenceArray[1], out iconIndex);
-                    }
-
-                    return GetFileIcon(iconPath, iconIndex);
-                }
+                return GetIconFromReference(reference);
             }
 
             return null;
@@ -234,6 +263,31 @@ namespace Core.Icons
             }
 
             return icon;
+        }
+
+        /// <summary>
+        /// Gets the icon from reference, like one in the form of "shell32.dll,4".
+        /// </summary>
+        /// <param name="reference">The reference.</param>
+        /// <returns></returns>
+        private static byte[] GetIconFromReference(string reference)
+        {
+            if (!string.IsNullOrEmpty(reference))
+            {
+                var ReferenceArray = reference.Split(',');
+
+                var iconPath = Environment.ExpandEnvironmentVariables(ReferenceArray[0]);
+                int iconIndex = 0;
+
+                if (ReferenceArray.Length > 1)
+                {
+                    int.TryParse(ReferenceArray[1], out iconIndex);
+                }
+
+                return GetFileIcon(iconPath, iconIndex);
+            }
+
+            return null;
         }
 
         #endregion
