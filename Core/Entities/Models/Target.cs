@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Quicken.Core.Index.Enumerations;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -28,5 +30,9 @@ namespace Quicken.Core.Index.Entities.Models
         public byte[] Icon { get; set; }
 
         public DateTime UpdatedDate { get; set; }
+
+        [Required]
+        [DefaultValue(typeof(TargetType), "0")]
+        public TargetType Platform { get; set; }
     }
 }

@@ -60,7 +60,7 @@
             Name="TargetNameLabel"
             HorizontalAlignment="Left" 
             Margin="192,20,0,37"
-            Width="285" 
+            Width="236" 
             Padding="2" 
             FontFamily="Calibri" 
             FontSize="16" 
@@ -78,7 +78,7 @@
             HorizontalAlignment="Left" 
             Margin="192,41,0,0" 
             VerticalAlignment="Top" 
-            Width="285" 
+            Width="236" 
             Padding="2" 
             FontFamily="Calibri" 
             VerticalContentAlignment="Center"
@@ -95,12 +95,30 @@
             Name="TargetIconImage" 
             Height="32"
             Width="32" 
-            Source="quicken.ico" Margin="153,24,315,24" />
+            Source="quicken.ico" 
+            Margin="153,24,315,24" />
         <Image 
             Name="RunAsAdministratorImage"
             HorizontalAlignment="Left" 
             Width="16"
             Height="16" 
-            Source="Images/run-as-administrator.png" Margin="147,18,0,46" />
+            Source="Images/run-as-administrator.png" 
+            Margin="147,18,0,46" />
+        <Image 
+        	x:Name="TargetTypeImage"
+        	HorizontalAlignment="Left" 
+        	Source="Images/target-desktop-application.png" 
+            Width="24"
+            Height="24" 
+            Margin="448,0,0,0" />
+        <Border 
+            Name="TargetTypeBorder"
+            BorderBrush="#444" 
+            BorderThickness="1" 
+            HorizontalAlignment="Left"
+            Height="36"
+            Margin="439,0,0,0" 
+            VerticalAlignment="Center" 
+            Width="1"/>
     </Grid>
 </Window>

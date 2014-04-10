@@ -1,5 +1,7 @@
-﻿using Quicken.Core.Index;
+﻿using Core.Metro;
+using Quicken.Core.Index;
 using Quicken.Core.Index.Entities.Models;
+using Quicken.Core.Index.Enumerations;
 using Quicken.UI.OperatingSystem;
 using Quicken.UI.OperatingSystem.Launcher;
 using System;
@@ -10,6 +12,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Quicken.UI
@@ -51,9 +54,9 @@ namespace Quicken.UI
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Draggable.Register(this, MainGrid);
-            UpdateRunAsAdministrator();
-            _nameLabelWithDescriptionMargin = this.TargetNameLabel.Margin;
-            _nameLabelWithoutDescriptionMargin = new Thickness(
+            this.ClearTarget();
+            this._nameLabelWithDescriptionMargin = this.TargetNameLabel.Margin;
+            this._nameLabelWithoutDescriptionMargin = new Thickness(
                 this._nameLabelWithDescriptionMargin.Left,
                 0, 
                 this._nameLabelWithDescriptionMargin.Right, 
@@ -156,18 +159,20 @@ namespace Quicken.UI
         /// </summary>
         private void UpdateRunAsAdministrator()
         {
-            this._runAsAdministrator = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) && this._currentTargets.Any();
+            this._runAsAdministrator = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) 
+                && this._currentTargets.Any() 
+                && this._currentTargets.First().Platform != TargetType.Metro;
 
             if (this._runAsAdministrator)
             {
-                RunAsAdministratorImage.Visibility = System.Windows.Visibility.Visible;
+                this.RunAsAdministratorImage.Visibility = Visibility.Visible;
             }
             else
             {
-                RunAsAdministratorImage.Visibility = System.Windows.Visibility.Hidden;
+                this.RunAsAdministratorImage.Visibility = Visibility.Hidden;
             }
         }
-
+        
         /// <summary>
         /// Runs the selected target.
         /// </summary>
@@ -181,7 +186,14 @@ namespace Quicken.UI
 
                 this._indexManager.UpdateTermTarget(target.TargetId, this.SearchTextBox.Text);
 
-                ShellLauncher.Start(target.Path, runAsAdministrator);
+                if (target.Platform == TargetType.Metro)
+                {
+                    MetroManager.Start(target.Path);
+                }
+                else
+                {
+                    ShellLauncher.Start(target.Path, runAsAdministrator);
+                }
             }
         }
 
@@ -198,7 +210,8 @@ namespace Quicken.UI
             if (!this.IsVisible)
             {
                 this.SearchTextBox.Clear();
-                this.ClearTarget();               
+                this.ClearTarget();
+                this.RunAsAdministratorImage.Visibility = System.Windows.Visibility.Hidden;
                 this.Show();
             }
 
@@ -213,7 +226,11 @@ namespace Quicken.UI
             this._currentTargets.Clear();
             this.TargetNameTextBlock.Text = string.Empty;
             this.TargetDescriptionTextBlock.Text = string.Empty;
+            this.TargetDescriptionTextBlock.ToolTip = string.Empty;
             this.TargetIconImage.Source = null;
+            this.RunAsAdministratorImage.Visibility = Visibility.Hidden;
+            this.TargetTypeBorder.Visibility = Visibility.Hidden;
+            this.TargetTypeImage.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
@@ -228,6 +245,7 @@ namespace Quicken.UI
             {
                 this.TargetNameTextBlock.Text = target.Name;
                 this.TargetDescriptionTextBlock.Text = target.Description;
+                this.TargetDescriptionTextBlock.ToolTip = target.Description;
 
                 if (!string.IsNullOrEmpty(target.Description))
                 {
@@ -237,6 +255,23 @@ namespace Quicken.UI
                 {
                     this.TargetNameLabel.Margin = this._nameLabelWithoutDescriptionMargin;
                 }
+
+                // Render the target type
+                if (target.Platform == TargetType.Metro)
+                {
+                    this.TargetTypeImage.Source = new BitmapImage(new Uri("Images/target-metro-application.png", UriKind.Relative));
+                }
+                else if (target.Platform == TargetType.Desktop)
+                {
+                    this.TargetTypeImage.Source = new BitmapImage(new Uri("Images/target-desktop-application.png", UriKind.Relative));
+                }
+                else
+                {
+                    this.TargetTypeImage.Source = new BitmapImage(new Uri("Images/target-file.png", UriKind.Relative));
+                }
+
+                this.TargetTypeBorder.Visibility = Visibility.Visible;
+                this.TargetTypeImage.Visibility = Visibility.Visible;
 
                 // Render the icon
                 this.TargetIconImage.Source = null;
@@ -260,7 +295,6 @@ namespace Quicken.UI
 
                     this.TargetIconImage.Source = icon;
                 }
-                
             }
         }
 

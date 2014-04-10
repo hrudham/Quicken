@@ -14,6 +14,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Principal;
+using System.Reflection;
+using Core.Metro;
+using Quicken.Core.Index.Enumerations; 
 
 namespace Quicken.Core.Index
 {
@@ -21,9 +25,28 @@ namespace Quicken.Core.Index
     {
         #region Fields
 
+        private bool _includeMetro = true;
         private HashSet<string> _directories;
         private static TargetRepository _targetRepository = new TargetRepository();
         private static IWshRuntimeLibrary.WshShell _shell = new IWshRuntimeLibrary.WshShell(); 
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets a value indicating whether this instance has metro support.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this instance has metro support; otherwise, <c>false</c>.
+        /// </value>
+        public bool HasMetroSupport
+        {
+            get
+            {
+                return true;
+            }
+        }
 
         #endregion
 
@@ -76,7 +99,30 @@ namespace Quicken.Core.Index
         /// </summary>
         private void UpdateIndex()
         {
-            var targets = new Dictionary<string, Target>();
+            var targets = this.GetDesktopTargets();
+            targets = targets.Union(this.GetMetroTargets());
+
+            var metroTargets = GetMetroTargets();
+
+            // Note that this method often gets run as a separate 
+            // thread, and since SQL CE is not inherently 
+            // thread-safe, it has it's own TargetRepository.
+            new TargetRepository().UpdateTargets(
+                targets
+                    .ToLookup(pair => pair.Path.ToUpperInvariant(), pair => pair)
+                    .ToDictionary(group => group.Key, group => group.First())
+                    .Select(i => i.Value)
+                    .ToList());
+        }
+
+        /// <summary>
+        /// Gets the desktop targets.
+        /// </summary>
+        /// <param name="directories">The directories.</param>
+        /// <returns></returns>
+        private IEnumerable<Target> GetDesktopTargets()
+        {
+            var targets = new List<Target>();
 
             foreach (var directory in this._directories)
             {
@@ -96,32 +142,51 @@ namespace Quicken.Core.Index
                         default:
                             {
                                 target = new Target()
-                                    {
-                                        Name = file.Name.Replace(file.Extension, string.Empty),
-                                        Description = GetFileDescription(file.FullName),
-                                        Path = file.FullName,
-                                        Icon = IconExtractor.GetIcon(file.FullName)
-                                    };
+                                {
+                                    Name = file.Name.Replace(file.Extension, string.Empty),
+                                    Description = GetFileDescription(file.FullName),
+                                    Path = file.FullName,
+                                    Icon = IconExtractor.GetIcon(file.FullName),
+                                    Platform = GetFilePlatformType(file.FullName)
+                                };
                             }
                             break;
                     }
-                    
+
                     if (target != null)
                     {
                         // Windows is case-insensitive when it comes to paths, and we
                         // want unique paths, hence why we make the key uppercase here.
-                        targets[target.Path.ToUpperInvariant()] = target;
+                        targets.Add(target);
                     }
                 }
             }
 
-            // Note that this method often gets run as a separate 
-            // thread, and since SQL CE is not inherently 
-            // thread-safe, it has it's own TargetRepository.
-            new TargetRepository().UpdateTargets(
-                targets
-                    .Select(i => i.Value)
-                    .ToList());
+            return targets;
+        }
+
+        /// <summary>
+        /// Gets the metro targets.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<Target> GetMetroTargets()
+        {
+            if (this._includeMetro && this.HasMetroSupport)
+            {
+                return MetroManager.GetApplications()
+                    .Select(
+                        app =>
+                            new Target()
+                            {
+                                Name = app.Name,
+                                Description = app.Description,
+                                Path = app.AppUserModelId,
+                                Icon = app.Icon,
+                                Platform = TargetType.Metro
+                            });
+            }
+
+            return new List<Target>();
         }
 
         /// <summary>
@@ -132,12 +197,14 @@ namespace Quicken.Core.Index
         private static Target GetLnkTarget(FileInfo file)
         {
             var lnkInfo = new LnkInfo(file.FullName);
+
             return new Target()
                 {
                     Name = lnkInfo.Name,
                     Description = GetFileDescription(lnkInfo.TargetPath),
                     Path = file.FullName,
-                    Icon = lnkInfo.Icon
+                    Icon = lnkInfo.Icon,
+                    Platform = GetFilePlatformType(lnkInfo.TargetPath)
                 };
         }
              
@@ -203,7 +270,8 @@ namespace Quicken.Core.Index
                     Name = file.Name.Replace(file.Extension, string.Empty),
                     Description = url,
                     Path = url,
-                    Icon = icon
+                    Icon = icon,
+                    Platform = TargetType.File
                 };
             }
         }
@@ -240,6 +308,16 @@ namespace Quicken.Core.Index
             }
 
             return description;
+        }
+
+        /// <summary>
+        /// Gets the type of the file platform.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        private static TargetType GetFilePlatformType(string path)
+        {
+            return File.Exists(path) && Path.GetExtension(path).ToUpperInvariant() == ".EXE" ? TargetType.Desktop : TargetType.File;
         }
         
         #endregion

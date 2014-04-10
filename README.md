@@ -18,7 +18,7 @@ Note that Quicken learns from what you type in. For example, if you type *word* 
 
 I really like how Launchy works. However, there are a few issues I have with it:
 
-It cannot do a couple Windows specific things, albeit for good reason, since it's OS agnostic. However, I want to be able to do things such as running an application as an administrator, run ".appref-ms" links, or launch Metro Applications (still to be implemented in Quicken to be honest, but it's on the list). 
+It cannot do a couple Windows specific things, albeit for good reason, since it's OS agnostic. However, I want to be able to do things such as running an application as an administrator, run ".appref-ms" links, or launch Metro Applications.
 
 Launchy also hasn't been updated in quite a while as well, and the source code is not available, so unfortunately I can't just fix the issues there.
 
@@ -37,3 +37,7 @@ I've never used WPF before; what better way is there to learn it than building a
 *I can't run x64 applications! What's wrong?*
 
 You probably have the x86 version of Quicken installed; install the x64 version instead to fix this.
+
+*Why won't Metro applicatons won't launch when I run build and run this through Visual Studio?
+
+You're probably running Visual Studio with administrator privileges turned on. 

@@ -1,12 +1,8 @@
-﻿using Quicken.UI.OperatingSystem.Launcher.Enumerations;
+﻿using Quicken.UI.Extensions;
+using Quicken.UI.OperatingSystem.Launcher.Enumerations;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Quicken.UI.Extensions;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace Quicken.UI.OperatingSystem.Launcher
 {

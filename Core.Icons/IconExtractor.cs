@@ -160,14 +160,14 @@ namespace Core.Icons
         {
             if (!string.IsNullOrEmpty(extension))
             {
-                var extensionKey = Registry.ClassesRoot.OpenSubKey(extension);
+                var extensionKey = Registry.CurrentUser.OpenSubKey(extension);
                 if (extensionKey != null)
                 {
                     var extensionValue = extensionKey.GetValue(string.Empty);
 
                     if (extensionValue != null)
                     {
-                        var defaultIconKey = Registry.ClassesRoot.OpenSubKey(
+                        var defaultIconKey = Registry.CurrentUser.OpenSubKey(
                             string.Format("{0}\\DefaultIcon", extensionValue));
 
                         if (defaultIconKey != null)
