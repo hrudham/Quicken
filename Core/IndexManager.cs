@@ -65,6 +65,7 @@ namespace Quicken.Core.Index
             this._directories.Add(Environment.ExpandEnvironmentVariables("%ProgramData%\\Microsoft\\Windows\\Start Menu"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%AppData%\\Microsoft\\Windows\\Start Menu"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%appdata%\\Microsoft\\Internet Explorer\\Quick Launch"));
+            this._directories.Add(Environment.ExpandEnvironmentVariables("%homedrive%%homepath%\\Links"));
 
             Task.Factory.StartNew(UpdateIndex);
         } 
@@ -126,38 +127,41 @@ namespace Quicken.Core.Index
 
             foreach (var directory in this._directories)
             {
-                // Find all links that point to an executable, and add them to the list of targets.
-                foreach (var file in new DirectoryInfo(directory).GetFiles("*.*", SearchOption.AllDirectories))
+                if (Directory.Exists(directory))
                 {
-                    var target = default(Target);
-
-                    switch (file.Extension.ToUpperInvariant())
+                    // Find all links that point to an executable, and add them to the list of targets.
+                    foreach (var file in new DirectoryInfo(directory).GetFiles("*.*", SearchOption.AllDirectories))
                     {
-                        case ".LNK":
-                            target = GetLnkTarget(file);
-                            break;
-                        case ".URL":
-                            target = GetUrlTarget(file);
-                            break;
-                        default:
-                            {
-                                target = new Target()
+                        var target = default(Target);
+
+                        switch (file.Extension.ToUpperInvariant())
+                        {
+                            case ".LNK":
+                                target = GetLnkTarget(file);
+                                break;
+                            case ".URL":
+                                target = GetUrlTarget(file);
+                                break;
+                            default:
                                 {
-                                    Name = file.Name.Replace(file.Extension, string.Empty),
-                                    Description = GetFileDescription(file.FullName),
-                                    Path = file.FullName,
-                                    Icon = IconExtractor.GetIcon(file.FullName),
-                                    Platform = GetFilePlatformType(file.FullName)
-                                };
-                            }
-                            break;
-                    }
+                                    target = new Target()
+                                    {
+                                        Name = file.Name.Replace(file.Extension, string.Empty),
+                                        Description = GetFileDescription(file.FullName),
+                                        Path = file.FullName,
+                                        Icon = IconExtractor.GetIcon(file.FullName),
+                                        Platform = GetFilePlatformType(file.FullName)
+                                    };
+                                }
+                                break;
+                        }
 
-                    if (target != null)
-                    {
-                        // Windows is case-insensitive when it comes to paths, and we
-                        // want unique paths, hence why we make the key uppercase here.
-                        targets.Add(target);
+                        if (target != null)
+                        {
+                            // Windows is case-insensitive when it comes to paths, and we
+                            // want unique paths, hence why we make the key uppercase here.
+                            targets.Add(target);
+                        }
                     }
                 }
             }
