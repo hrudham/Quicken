@@ -3,6 +3,8 @@ Quicken
 
 A task launcher similar to Launchy. It has been written specifically for Windows 8.1.
 
+![alt tag](Example.png)
+
 ## How do I use it?
 
 1. Press **ALT + SPACE** to show the application from anywhere on our desktop.
