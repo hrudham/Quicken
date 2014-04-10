@@ -8,7 +8,7 @@ A task launcher similar to Launchy. It has been written specifically for Windows
 1. Press **ALT + SPACE** to show the application from anywhere on our desktop.
 2. Type to search for your application or link by name.
 3. Press the **UP** or **DOWN** keys to iterate through targets that match your query.
-4. Press **ENTER** to run your selected Target, or press **SHIFT + ENTER** to run it as an administrator.
+4. Press **ENTER** to run your selected target, or press **SHIFT + ENTER** to run it as an administrator (the latter for desktop applications only).
 
 Note that Quicken learns from what you type in. For example, if you type *word* and it selects **Wordpad**, but then you change the selection to **Microsoft Word** and execute it, the next time you type in *word*, it will highlight **Microsoft Word** instead.
 
@@ -38,6 +38,6 @@ I've never used WPF before; what better way is there to learn it than building a
 
 You probably have the x86 version of Quicken installed; install the x64 version instead to fix this.
 
-*Why won't Metro applicatons won't launch when I run build and run this through Visual Studio?
+*Why won't Metro applicatons launch when I run build and run this through Visual Studio?*
 
-You're probably running Visual Studio with administrator privileges turned on. 
+You're probably running Visual Studio with administrator privileges turned on. Try turning it off.
