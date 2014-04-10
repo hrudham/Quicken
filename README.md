@@ -38,6 +38,6 @@ I've never used WPF before; what better way is there to learn it than building a
 
 You probably have the x86 version of Quicken installed; install the x64 version instead to fix this.
 
-*Why won't Metro applicatons won't launch when I run build and run this through Visual Studio?*
+*Why won't Metro applicatons launch when I run build and run this through Visual Studio?*
 
 You're probably running Visual Studio with administrator privileges turned on. Try turning it off.
