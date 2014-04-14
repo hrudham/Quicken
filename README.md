@@ -20,9 +20,7 @@ Note that Quicken learns from what you type in. For example, if you type *word* 
 
 I really like how Launchy works. However, there are a few issues I have with it:
 
-It cannot do a couple Windows specific things, albeit for good reason, since it's OS agnostic. However, I want to be able to do things such as running an application as an administrator, run ".appref-ms" links, or launch Metro Applications.
-
-Launchy also hasn't been updated in quite a while as well, and the source code is not available, so unfortunately I can't just fix the issues there.
+It cannot do a couple Windows specific things, albeit for good reason, since it's OS agnostic. However, I want to be able to do things such as running an application as an administrator, and launching ```.appref-ms``` links and Metro applications.
 
 *The Windows 8.1 start-menu does most of this already. Why re-invent the wheel?*
 

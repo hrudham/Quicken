@@ -3,9 +3,12 @@ using Quicken.Core.Index.Entities.Models;
 using Quicken.Core.Index.Repositories.Base;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Quicken.Core.Index.Extensions;
 
 namespace Quicken.Core.Index.Repositories
 {
@@ -46,6 +49,35 @@ namespace Quicken.Core.Index.Repositories
                     item.current.Name = item.changed.Name;
                     item.current.Description = item.changed.Description;
                     item.current.Icon = item.changed.Icon;
+
+                    // Update the aliases; remove old ones, and add 
+                    // new ones. Leave all others alone.
+                    var obsoleteAliases = item.current.Aliases
+                        .Where(
+                            currentAlias => !item.changed.Aliases
+                                .Any(
+                                    changedAlias => changedAlias.Text == currentAlias.Text))
+                        .ToList();
+
+                    foreach (var obsoleteAlias in obsoleteAliases)
+                    {
+                        this.DataContext.Aliases.Remove(obsoleteAlias);
+                    }
+
+                    var newAliases = item.changed.Aliases
+                        .Where(
+                            changedAlias => !item.current.Aliases
+                                .Any(
+                                    currentAlias => currentAlias.Text == changedAlias.Text));
+
+                    foreach (var newAlias in newAliases)
+                    {
+                        item.current.Aliases.Add(
+                            new Alias() 
+                            { 
+                                Text = newAlias.Text 
+                            });
+                    }
                 }
             }
 
@@ -77,16 +109,18 @@ namespace Quicken.Core.Index.Repositories
             {
                 var results = this.DataContext.Targets
                     .Include("Terms")
+                    .Include("Aliases")
                     .Where(
                         target =>
-                            target.Name.ToUpper().StartsWith(text.ToUpper()) ||
-                            target.Name.ToUpper().IndexOf(" " + text.ToUpper()) >= 0)
+                            target.Aliases.Any(alias => alias.Text.StartsWith(text.ToUpper())) ||
+                            target.Aliases.Any(alias => alias.Text.IndexOf(" " + text.ToUpper()) >= 0))
                     .OrderByDescending(
                         target => 
                             target.Terms
                                 .Max(
                                     term =>
                                         text.ToUpper().StartsWith(term.Text.ToUpper()) ? term.Text.Length : 0))
+                    .ThenBy(target => target.Name.ToUpper().IndexOf(text.ToUpper()))
                     .ThenBy(target => target.Name)
                     .ToList();
 

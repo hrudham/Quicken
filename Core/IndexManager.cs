@@ -17,7 +17,8 @@ using System.Threading.Tasks;
 using System.Security.Principal;
 using System.Reflection;
 using Core.Metro;
-using Quicken.Core.Index.Enumerations; 
+using Quicken.Core.Index.Enumerations;
+using Quicken.Core.Index.Extensions;
 
 namespace Quicken.Core.Index
 {
@@ -103,8 +104,6 @@ namespace Quicken.Core.Index
             var targets = this.GetDesktopTargets();
             targets = targets.Union(this.GetMetroTargets());
 
-            var metroTargets = GetMetroTargets();
-
             // Note that this method often gets run as a separate 
             // thread, and since SQL CE is not inherently 
             // thread-safe, it has it's own TargetRepository.
@@ -158,8 +157,12 @@ namespace Quicken.Core.Index
 
                         if (target != null)
                         {
-                            // Windows is case-insensitive when it comes to paths, and we
-                            // want unique paths, hence why we make the key uppercase here.
+                            //Add generic alias information
+                            target.AddAlias(target.Name);
+
+                            target.AddAlias(GetPathAliasText(target.Path));
+
+                            // Add this new target to our collection
                             targets.Add(target);
                         }
                     }
@@ -202,7 +205,7 @@ namespace Quicken.Core.Index
         {
             var lnkInfo = new LnkInfo(file.FullName);
 
-            return new Target()
+            var target = new Target()
                 {
                     Name = lnkInfo.Name,
                     Description = GetFileDescription(lnkInfo.TargetPath),
@@ -210,6 +213,10 @@ namespace Quicken.Core.Index
                     Icon = lnkInfo.Icon,
                     Platform = GetFilePlatformType(lnkInfo.TargetPath)
                 };
+
+            target.AddAlias(GetPathAliasText(lnkInfo.TargetPath));
+
+            return target;
         }
              
         /// <summary>
@@ -269,7 +276,7 @@ namespace Quicken.Core.Index
 
                 var icon = IconExtractor.GetIcon(iconPath, iconIndex);
                                                 
-                return new Target()
+                var target = new Target()
                 {
                     Name = file.Name.Replace(file.Extension, string.Empty),
                     Description = url,
@@ -277,6 +284,8 @@ namespace Quicken.Core.Index
                     Icon = icon,
                     Platform = TargetType.File
                 };
+
+                return target;
             }
         }
 
@@ -323,7 +332,26 @@ namespace Quicken.Core.Index
         {
             return File.Exists(path) && Path.GetExtension(path).ToUpperInvariant() == ".EXE" ? TargetType.Desktop : TargetType.File;
         }
-        
+
+        /// <summary>
+        /// Gets the path alias text.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
+        private static string GetPathAliasText(string path)
+        {
+            var targetUri = default(Uri);
+            if (Uri.TryCreate(path, UriKind.RelativeOrAbsolute, out targetUri))
+            {
+                if (targetUri.IsFile)
+                {
+                    return Path.GetFileNameWithoutExtension(path);
+                }
+            }
+
+            return null;
+        }
+                
         #endregion
     }
 }

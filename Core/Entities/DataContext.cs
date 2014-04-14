@@ -12,5 +12,6 @@ namespace Quicken.Core.Index.Entities
     {
         public DbSet<Target> Targets { get; set; }
         public DbSet<Term> Terms { get; set; }
+        public DbSet<Alias> Aliases { get; set; }
     }
 }
