@@ -3,7 +3,7 @@ Quicken
 
 A task launcher similar to Launchy. It has been written specifically for Windows 8.1.
 
-![alt tag](Example.png)
+![alt tag](Example.gif)
 
 ## How do I use it?
 
