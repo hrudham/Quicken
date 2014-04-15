@@ -59,7 +59,7 @@ namespace Quicken.Core.Index
         public IndexManager()
         {
             // Make sure that the database is always created if it changes, or simply does not exist.
-            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<DataContext>());
+            Database.SetInitializer(new DataInitializer());
 
             this._directories = new HashSet<string>();
 

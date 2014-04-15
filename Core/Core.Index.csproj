@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\DataContext.cs" />
+    <Compile Include="Entities\DataInitializer.cs" />
     <Compile Include="Entities\Models\Alias.cs" />
     <Compile Include="Entities\Models\Target.cs" />
     <Compile Include="Entities\Models\Term.cs" />

@@ -107,13 +107,13 @@ namespace Quicken.Core.Index.Repositories
         {
             if (!string.IsNullOrEmpty(text))
             {
-                var results = this.DataContext.Targets
-                    .Include("Terms")
-                    .Include("Aliases")
+                var results = this.DataContext
+                    .Aliases
                     .Where(
-                        target =>
-                            target.Aliases.Any(alias => alias.Text.StartsWith(text.ToUpper())) ||
-                            target.Aliases.Any(alias => alias.Text.IndexOf(" " + text.ToUpper()) >= 0))
+                        alias =>
+                            alias.Text.StartsWith(text.ToUpper()) ||
+                            alias.Text.IndexOf(" " + text.ToUpper()) >= 0)
+                    .Select(alias => alias.Target)
                     .OrderByDescending(
                         target => 
                             target.Terms
