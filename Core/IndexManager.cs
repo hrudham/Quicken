@@ -183,13 +183,19 @@ namespace Quicken.Core.Index
                 return MetroManager.GetApplications()
                     .Select(
                         app =>
-                            new Target()
                             {
-                                Name = app.Name,
-                                Description = app.Description,
-                                Path = app.AppUserModelId,
-                                Icon = app.Icon,
-                                Platform = TargetType.Metro
+                                var target = new Target()
+                                {
+                                    Name = app.Name,
+                                    Description = app.Description,
+                                    Path = app.AppUserModelId,
+                                    Icon = app.Icon,
+                                    Platform = TargetType.Metro,
+                                };
+
+                                target.AddAlias(target.Name);
+
+                                return target;
                             });
             }
 
