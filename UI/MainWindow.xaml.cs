@@ -122,13 +122,14 @@ namespace Quicken.UI
             {
                 if (!string.IsNullOrEmpty(SearchTextBox.Text))
                 {
-                    this._currentTargets = this._indexManager.FindTargets(SearchTextBox.Text);
+                    var newTargets = this._indexManager.FindTargets(SearchTextBox.Text);
 
                     // Only update the results if we actually receive new ones; if nothing
                     // comes back, we still want to display the old results. This allows
                     // queries like like "notepaddd" to still find "notepad"
-                    if (this._currentTargets.Any())
+                    if (newTargets.Any())
                     {
+                        this._currentTargets = newTargets;
                         this.RenderCurrentTarget();
                     }
                 }
