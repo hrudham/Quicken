@@ -16,7 +16,8 @@ namespace Quicken.UI.ViewModel
 
         private Target _CurrentTarget = null;
         private bool _IsRunAsAdministrator = false;
-        private bool _IsUpdating = false; 
+        private bool _IsUpdating = false;
+        private string _Query = string.Empty;
 
         #endregion
 
@@ -73,6 +74,24 @@ namespace Quicken.UI.ViewModel
             set
             {
                 this.SetField(ref this._IsUpdating, value, () => this.IsUpdating);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the query.
+        /// </summary>
+        /// <value>
+        /// The query.
+        /// </value>
+        public string Query
+        {
+            get
+            {
+                return this._Query;
+            }
+            set
+            {
+                this.SetField(ref this._Query, value, () => this.Query);
             }
         }
 

@@ -16,6 +16,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace Quicken.UI
 {
@@ -47,6 +48,38 @@ namespace Quicken.UI
             InitializeComponent();
             this.ViewModel = new MainWindowViewModel();
             this.DataContext = this.ViewModel;
+
+            this.ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+        }
+
+        /// <summary>
+        /// Handles the PropertyChanged event of the ViewModel control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
+        void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "Query")
+            {
+                if (!string.IsNullOrEmpty(this.ViewModel.Query))
+                {
+                    var newTargets = this._indexManager.FindTargets(this.ViewModel.Query);
+
+                    // Only update the results if we actually receive new ones; if nothing
+                    // comes back, we still want to display the old results. This allows
+                    // queries like like "notepaddd" to still find "notepad"
+                    if (newTargets.Any())
+                    {
+                        this._currentTargets = newTargets;
+                        this.RenderCurrentTarget();
+                    }
+                }
+                else
+                {
+                    // No query was specified, so display no results.
+                    this.ViewModel.CurrentTarget = null;
+                }
+            }
         } 
 
         #endregion
@@ -85,7 +118,7 @@ namespace Quicken.UI
             switch (e.Key)
             {
                 case Key.Escape:
-                    this.Hide();
+                    this.HideWindow();
                     break;
                 case Key.Enter:
                     this.ExecuteCurrentTarget(this.ViewModel.IsRunAsAdministrator);
@@ -115,43 +148,13 @@ namespace Quicken.UI
         }
 
         /// <summary>
-        /// Handles the TextChanged event of the SearchTextBox control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.Controls.TextChangedEventArgs"/> instance containing the event data.</param>
-        private void SearchTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            if (this.IsLoaded)
-            {
-                if (!string.IsNullOrEmpty(SearchTextBox.Text))
-                {
-                    var newTargets = this._indexManager.FindTargets(SearchTextBox.Text);
-
-                    // Only update the results if we actually receive new ones; if nothing
-                    // comes back, we still want to display the old results. This allows
-                    // queries like like "notepaddd" to still find "notepad"
-                    if (newTargets.Any())
-                    {
-                        this._currentTargets = newTargets;
-                        this.RenderCurrentTarget();
-                    }
-                }
-                else
-                {
-                    // No query was specified, so display no results.
-                    this.ViewModel.CurrentTarget = null;
-                }
-            }
-        }
-
-        /// <summary>
         /// Handles the Deactivated event of the Window control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void Window_Deactivated(object sender, System.EventArgs e)
         {
-            this.Hide();
+            this.HideWindow();
         }
 
         #endregion
@@ -191,11 +194,11 @@ namespace Quicken.UI
         /// </summary>
         public void ExecuteCurrentTarget(bool runAsAdministrator)
         {
+            this.HideWindow();
+
             if (this.ViewModel.CurrentTarget != null)
             {
-                this.Hide();
-
-                this._indexManager.UpdateTermTarget(this.ViewModel.CurrentTarget.TargetId, this.SearchTextBox.Text);
+                this._indexManager.UpdateTermTarget(this.ViewModel.CurrentTarget.TargetId, this.ViewModel.Query);
 
                 if (this.ViewModel.CurrentTarget.Platform == TargetType.Metro)
                 {
@@ -206,6 +209,15 @@ namespace Quicken.UI
                     ShellLauncher.Start(this.ViewModel.CurrentTarget.Path, runAsAdministrator);
                 }
             }
+        }
+
+        /// <summary>
+        /// Hides the window.
+        /// </summary>
+        public void HideWindow()
+        {
+            this.SearchTextBox.SelectAll();
+            this.Hide();
         }
 
         /// <summary>
@@ -220,8 +232,6 @@ namespace Quicken.UI
 
             if (!this.IsVisible)
             {
-                this.ViewModel.IsRunAsAdministrator = false;
-                this.ViewModel.CurrentTarget = null;
                 this.Show();
             }
 
