@@ -30,5 +30,15 @@ namespace Quicken.Core.Index.Extensions
 
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
+
+        /// <summary>
+        /// Gets the abbreviation.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <returns></returns>
+        public static string GetAbbreviation(this string source)
+        {
+            return new string(source.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray());
+        }
     }
 }

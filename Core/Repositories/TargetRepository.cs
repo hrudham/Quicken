@@ -131,6 +131,15 @@ namespace Quicken.Core.Index.Repositories
         }
 
         /// <summary>
+        /// Determines whether this instance has targets.
+        /// </summary>
+        /// <returns></returns>
+        internal bool HasTargets()
+        {
+            return this.DataContext.Targets.Any();
+        }
+
+        /// <summary>
         /// Updates the term target.
         /// </summary>
         /// <param name="targetId">The target identifier.</param>

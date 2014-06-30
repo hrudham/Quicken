@@ -19,6 +19,7 @@ using System.Reflection;
 using Core.Metro;
 using Quicken.Core.Index.Enumerations;
 using Quicken.Core.Index.Extensions;
+using System.Threading;
 
 namespace Quicken.Core.Index
 {
@@ -67,6 +68,17 @@ namespace Quicken.Core.Index
             this._directories.Add(Environment.ExpandEnvironmentVariables("%AppData%\\Microsoft\\Windows\\Start Menu"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%appdata%\\Microsoft\\Internet Explorer\\Quick Launch"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%homedrive%%homepath%\\Links"));
+
+            // If there are no targets when we start, automatically start looking for some.
+            if (!_targetRepository.HasTargets())
+            {
+                new Thread(
+                    delegate()
+                    {
+                        this.UpdateIndex();
+                    })
+                    .Start();
+            }
         } 
 
         #endregion
@@ -158,6 +170,12 @@ namespace Quicken.Core.Index
                             //Add generic alias information
                             target.AddAlias(target.Name);
 
+                            var abbreviation = target.Name.GetAbbreviation();
+                            if (abbreviation.Length > 1)
+                            {
+                                target.AddAlias(abbreviation);
+                            }
+
                             target.AddAlias(GetPathAliasText(target.Path));
 
                             // Add this new target to our collection
@@ -192,6 +210,12 @@ namespace Quicken.Core.Index
                                 };
 
                                 target.AddAlias(target.Name);
+
+                                var abbreviation = target.Name.GetAbbreviation();
+                                if (abbreviation.Length > 1)
+                                {
+                                    target.AddAlias(abbreviation);
+                                }
 
                                 return target;
                             });

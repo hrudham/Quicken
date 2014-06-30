@@ -61,7 +61,6 @@ namespace Quicken.UI
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Draggable.Register(this, MainGrid);
-            this.Update();
         }
 
         /// <summary>
