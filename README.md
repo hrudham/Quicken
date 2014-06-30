@@ -11,6 +11,7 @@ A task launcher similar to Launchy. It has been written specifically for Windows
 2. Type to search for your application or link by name.
 3. Press the **UP** or **DOWN** keys to iterate through targets that match your query.
 4. Press **ENTER** to run your selected target, or press **SHIFT + ENTER** to run it as an administrator (the latter for desktop applications only).
+5. Press **F5** if you wish to refresh the application database.
 
 Note that Quicken learns from what you type in. For example, if you type *word* and it selects **Wordpad**, but then you change the selection to **Microsoft Word** and execute it, the next time you type in *word*, it will highlight **Microsoft Word** instead.
 

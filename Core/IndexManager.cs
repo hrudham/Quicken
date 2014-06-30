@@ -67,8 +67,6 @@ namespace Quicken.Core.Index
             this._directories.Add(Environment.ExpandEnvironmentVariables("%AppData%\\Microsoft\\Windows\\Start Menu"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%appdata%\\Microsoft\\Internet Explorer\\Quick Launch"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%homedrive%%homepath%\\Links"));
-
-            Task.Factory.StartNew(UpdateIndex);
         } 
 
         #endregion
@@ -99,7 +97,7 @@ namespace Quicken.Core.Index
         /// Updates the index. 
         /// repository.
         /// </summary>
-        private void UpdateIndex()
+        public void UpdateIndex()
         {
             var targets = this.GetDesktopTargets();
             targets = targets.Union(this.GetMetroTargets());

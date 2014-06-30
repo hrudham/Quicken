@@ -186,6 +186,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Core\NotifyPropertyChanged.cs" />
     <Compile Include="Extensions\EnumerationExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="OperatingSystem\Draggable.cs" />
@@ -199,6 +200,7 @@
     <Compile Include="OperatingSystem\Launcher\ShellExecuteInfo.cs" />
     <Compile Include="OperatingSystem\SystemTrayController.cs" />
     <Compile Include="OperatingSystem\DelegateCommand.cs" />
+    <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

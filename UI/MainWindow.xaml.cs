@@ -4,12 +4,14 @@ using Quicken.Core.Index.Entities.Models;
 using Quicken.Core.Index.Enumerations;
 using Quicken.UI.OperatingSystem;
 using Quicken.UI.OperatingSystem.Launcher;
+using Quicken.UI.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -24,11 +26,14 @@ namespace Quicken.UI
     {
         #region Fields
 
-        private Thickness _nameLabelWithDescriptionMargin;
-        private Thickness _nameLabelWithoutDescriptionMargin;
         private IndexManager _indexManager = new IndexManager();
         private IList<Target> _currentTargets = new List<Target>();
-        public bool _runAsAdministrator = false;
+
+        #endregion
+
+        #region Fields
+
+        private MainWindowViewModel ViewModel { get; set; }
 
         #endregion
 
@@ -40,6 +45,8 @@ namespace Quicken.UI
         public MainWindow()
         {
             InitializeComponent();
+            this.ViewModel = new MainWindowViewModel();
+            this.DataContext = this.ViewModel;
         } 
 
         #endregion
@@ -54,13 +61,7 @@ namespace Quicken.UI
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             Draggable.Register(this, MainGrid);
-            this.ClearTarget();
-            this._nameLabelWithDescriptionMargin = this.TargetNameLabel.Margin;
-            this._nameLabelWithoutDescriptionMargin = new Thickness(
-                this._nameLabelWithDescriptionMargin.Left,
-                0, 
-                this._nameLabelWithDescriptionMargin.Right, 
-                0);
+            this.Update();
         }
 
         /// <summary>
@@ -88,13 +89,16 @@ namespace Quicken.UI
                     this.Hide();
                     break;
                 case Key.Enter:
-                    this.ExecuteCurrentTarget(this._runAsAdministrator);
+                    this.ExecuteCurrentTarget(this.ViewModel.IsRunAsAdministrator);
                     break;
                 case Key.Up:
                     this.AdjustCurrentTarget(true);
                     break;
                 case Key.Down:
                     this.AdjustCurrentTarget(false);
+                    break;
+                case Key.F5:
+                    this.Update();
                     break;
                 default:
                     break;
@@ -136,7 +140,7 @@ namespace Quicken.UI
                 else
                 {
                     // No query was specified, so display no results.
-                    this.ClearTarget();
+                    this.ViewModel.CurrentTarget = null;
                 }
             }
         }
@@ -156,22 +160,31 @@ namespace Quicken.UI
         #region Methods
 
         /// <summary>
+        /// Updates this instance.
+        /// </summary>
+        private void Update()
+        {
+            if (!this.ViewModel.IsUpdating)
+            {
+                new Thread(
+                    delegate()
+                    {
+                        this.ViewModel.IsUpdating = true;
+                        this._indexManager.UpdateIndex();
+                        this.ViewModel.IsUpdating = false;
+                    })
+                    .Start();
+            }
+        }
+
+        /// <summary>
         /// Updates the run as administrator.
         /// </summary>
         private void UpdateRunAsAdministrator()
         {
-            this._runAsAdministrator = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) 
+            this.ViewModel.IsRunAsAdministrator = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) 
                 && this._currentTargets.Any() 
                 && this._currentTargets.First().Platform != TargetType.Metro;
-
-            if (this._runAsAdministrator)
-            {
-                this.RunAsAdministratorImage.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                this.RunAsAdministratorImage.Visibility = Visibility.Hidden;
-            }
         }
         
         /// <summary>
@@ -179,21 +192,19 @@ namespace Quicken.UI
         /// </summary>
         public void ExecuteCurrentTarget(bool runAsAdministrator)
         {
-            if (this._currentTargets.Any())
+            if (this.ViewModel.CurrentTarget != null)
             {
                 this.Hide();
 
-                var target = this._currentTargets.First();
+                this._indexManager.UpdateTermTarget(this.ViewModel.CurrentTarget.TargetId, this.SearchTextBox.Text);
 
-                this._indexManager.UpdateTermTarget(target.TargetId, this.SearchTextBox.Text);
-
-                if (target.Platform == TargetType.Metro)
+                if (this.ViewModel.CurrentTarget.Platform == TargetType.Metro)
                 {
-                    MetroManager.Start(target.Path);
+                    MetroManager.Start(this.ViewModel.CurrentTarget.Path);
                 }
                 else
                 {
-                    ShellLauncher.Start(target.Path, runAsAdministrator);
+                    ShellLauncher.Start(this.ViewModel.CurrentTarget.Path, runAsAdministrator);
                 }
             }
         }
@@ -210,28 +221,12 @@ namespace Quicken.UI
 
             if (!this.IsVisible)
             {
-                this.SearchTextBox.Clear();
-                this.ClearTarget();
-                this.RunAsAdministratorImage.Visibility = System.Windows.Visibility.Hidden;
+                this.ViewModel.IsRunAsAdministrator = false;
+                this.ViewModel.CurrentTarget = null;
                 this.Show();
             }
 
             this.Activate();
-        }
-
-        /// <summary>
-        /// Clears this instance.
-        /// </summary>
-        private void ClearTarget()
-        {
-            this._currentTargets.Clear();
-            this.TargetNameTextBlock.Text = string.Empty;
-            this.TargetDescriptionTextBlock.Text = string.Empty;
-            this.TargetDescriptionTextBlock.ToolTip = string.Empty;
-            this.TargetIconImage.Source = null;
-            this.RunAsAdministratorImage.Visibility = Visibility.Hidden;
-            this.TargetTypeBorder.Visibility = Visibility.Hidden;
-            this.TargetTypeImage.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
@@ -242,21 +237,10 @@ namespace Quicken.UI
         {
             var target = this._currentTargets.FirstOrDefault();
 
+            this.ViewModel.CurrentTarget = target;
+
             if (target != null)
-            {
-                this.TargetNameTextBlock.Text = target.Name;
-                this.TargetDescriptionTextBlock.Text = target.Description;
-                this.TargetDescriptionTextBlock.ToolTip = target.Description;
-
-                if (!string.IsNullOrEmpty(target.Description))
-                {
-                    this.TargetNameLabel.Margin = this._nameLabelWithDescriptionMargin;
-                }
-                else
-                {
-                    this.TargetNameLabel.Margin = this._nameLabelWithoutDescriptionMargin;
-                }
-
+            {                
                 // Render the target type
                 if (target.Platform == TargetType.Metro)
                 {
@@ -270,10 +254,7 @@ namespace Quicken.UI
                 {
                     this.TargetTypeImage.Source = new BitmapImage(new Uri("Images/target-file.png", UriKind.Relative));
                 }
-
-                this.TargetTypeBorder.Visibility = Visibility.Visible;
-                this.TargetTypeImage.Visibility = Visibility.Visible;
-
+                
                 // Render the icon
                 this.TargetIconImage.Source = null;
                 if (target.Icon != null)
