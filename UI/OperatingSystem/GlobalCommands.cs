@@ -18,10 +18,11 @@ namespace Quicken.UI.OperatingSystem
             return new DelegateCommand
             {
                 CanExecuteFunc = () =>
+                    Application.Current != null &&
                     Application.Current.MainWindow != null,
                 CommandAction = () =>
                 {
-                    App.ShowMainWindow();
+                    Application.Current.MainWindow.Show();
                 }
             };
         }
@@ -33,7 +34,8 @@ namespace Quicken.UI.OperatingSystem
         {
             return new DelegateCommand
             {
-                CanExecuteFunc = () => 
+                CanExecuteFunc = () =>
+                    Application.Current != null &&
                     Application.Current.MainWindow != null && 
                     Application.Current.MainWindow.IsVisible,
                 CommandAction = () => 

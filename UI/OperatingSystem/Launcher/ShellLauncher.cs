@@ -2,6 +2,7 @@
 using Quicken.UI.OperatingSystem.Launcher.Enumerations;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Quicken.UI.OperatingSystem.Launcher
@@ -9,9 +10,6 @@ namespace Quicken.UI.OperatingSystem.Launcher
     public static class ShellLauncher
     {
         #region Unmanaged Methods
-
-        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
-        static extern bool ShellExecuteEx(ref ShellExecuteInfo lpExecInfo);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool Wow64RevertWow64FsRedirection(IntPtr ptr);
@@ -47,17 +45,12 @@ namespace Quicken.UI.OperatingSystem.Launcher
                     This code still works fine for everything else, and if this application is 
                     compiled as x64 it all works, so I'm leaving this as is for now.
                 */
-
-                ShellExecuteInfo shellExecuteInfo = new ShellExecuteInfo();
-                shellExecuteInfo.cbSize = Marshal.SizeOf(shellExecuteInfo);
-                shellExecuteInfo.lpVerb = runAsAdministrator ? Verbs.RunAs.GetDisplayName() : Verbs.Open.GetDisplayName();
-                shellExecuteInfo.lpFile = path;
-                shellExecuteInfo.nShow = (int)ShowCommands.SW_SHOW;
-
-                if (!ShellExecuteEx(ref shellExecuteInfo))
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
+                
+                var startInfo = new ProcessStartInfo(path);
+                startInfo.UseShellExecute = true;
+                startInfo.Verb = runAsAdministrator ? Verbs.RunAs.GetDisplayName() : Verbs.Default.GetDisplayName();
+                startInfo.WindowStyle = ProcessWindowStyle.Normal;
+                Process.Start(startInfo);
             }
             finally
             {

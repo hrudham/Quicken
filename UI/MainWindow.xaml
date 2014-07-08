@@ -88,7 +88,7 @@
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"/>
             </TextBox.SelectionBrush>
         </TextBox>
-        <Grid Margin="148,15,19,15">
+        <Grid Margin="148,15,19,15" ToolTip="{Binding CurrentTarget.Path}">
             <Image Name="TargetIconImage" 
                    HorizontalAlignment="Left" 
                    Height="32"

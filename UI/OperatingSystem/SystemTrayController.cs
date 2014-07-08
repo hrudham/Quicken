@@ -23,18 +23,7 @@ namespace Quicken.UI.OperatingSystem
                 return GlobalCommands.ShowWindowCommand();
             }
         }
-
-        /// <summary>
-        /// Hides the main window. This command is only enabled if a window is open.
-        /// </summary>
-        public ICommand HideWindowCommand
-        {
-            get
-            {
-                return GlobalCommands.HideWindowCommand();
-            }
-        }
-
+        
         /// <summary>
         /// Shuts down the application.
         /// </summary>

@@ -19,7 +19,7 @@ namespace Quicken.Core.Index.Entities
             base.Seed(context);
 
             context.Database.ExecuteSqlCommand(
-                CreatIndexSql("Text", typeof(Alias)));
+                CreatIndexSql("Text", "Aliases"));
         }
 
         /// <summary>
@@ -28,9 +28,9 @@ namespace Quicken.Core.Index.Entities
         /// <param name="field">The field.</param>
         /// <param name="table">The table.</param>
         /// <returns></returns>
-        private string CreatIndexSql(string field, Type table)
+        private string CreatIndexSql(string field, string table)
         {
-            return String.Format("CREATE INDEX IX_{0} ON {1} ({0})", field, table.Name);
+            return String.Format("CREATE INDEX IX_{0} ON {1} ({0})", field, table);
         }   
     }
 }

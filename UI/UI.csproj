@@ -26,7 +26,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ProductName>Quicken</ProductName>
-    <ApplicationRevision>35</ApplicationRevision>
+    <ApplicationRevision>38</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -194,10 +194,8 @@
     <Compile Include="OperatingSystem\HotKey\HotKeyBinding.cs" />
     <Compile Include="OperatingSystem\HotKey\HotKeyManager.cs" />
     <Compile Include="OperatingSystem\HotKey\HotKeyModifier.cs" />
-    <Compile Include="OperatingSystem\Launcher\Enumerations\ShowCommands.cs" />
     <Compile Include="OperatingSystem\Launcher\Enumerations\Verbs.cs" />
     <Compile Include="OperatingSystem\Launcher\ShellLauncher.cs" />
-    <Compile Include="OperatingSystem\Launcher\ShellExecuteInfo.cs" />
     <Compile Include="OperatingSystem\SystemTrayController.cs" />
     <Compile Include="OperatingSystem\DelegateCommand.cs" />
     <Compile Include="ViewModel\MainWindowViewModel.cs" />

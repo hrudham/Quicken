@@ -70,7 +70,7 @@ namespace Quicken.Core.Index
             this._directories.Add(Environment.ExpandEnvironmentVariables("%homedrive%%homepath%\\Links"));
 
             // If there are no targets when we start, automatically start looking for some.
-            if (!_targetRepository.HasTargets())
+            if (!new TargetRepository().HasTargets())
             {
                 new Thread(
                     delegate()
