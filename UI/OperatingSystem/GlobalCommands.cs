@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using Quicken.UI.Extensions;
 
 namespace Quicken.UI.OperatingSystem
 {
@@ -22,7 +23,14 @@ namespace Quicken.UI.OperatingSystem
                     Application.Current.MainWindow != null,
                 CommandAction = () =>
                 {
-                    Application.Current.MainWindow.Show();
+                    var window = Application.Current.MainWindow;
+
+                    window.Show();
+
+                    window.Left = (SystemParameters.PrimaryScreenWidth / 2) - (window.Width / 2);
+                    window.Top = (SystemParameters.PrimaryScreenHeight / 2) - (window.Height / 2);
+
+                    window.Activate();
                 }
             };
         }

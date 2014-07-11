@@ -1,17 +1,9 @@
-﻿using Quicken.Core.Index;
-using Quicken.Core.Index.Entities;
-using Hardcodet.Wpf.TaskbarNotification;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Security.Principal;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
+﻿using Hardcodet.Wpf.TaskbarNotification;
 using Quicken.UI.OperatingSystem;
 using Quicken.UI.OperatingSystem.HotKey;
+using System;
+using System.Windows;
+using System.Windows.Input;
 
 namespace Quicken.UI
 {
@@ -58,19 +50,6 @@ namespace Quicken.UI
                             command.Execute(null);
                         }
                     });
-
-            // Register the MainWindowShown event handler.
-            MainWindowShown += App_OnMainWindowShown;
-        }
-
-        /// <summary>
-        /// Handles the OnMainWindowShown event of the App control.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void App_OnMainWindowShown(object sender, EventArgs e)
-        {
-            _mainWindow.Display();
         }
 
         /// <summary>

@@ -15,8 +15,9 @@
         Background="{x:Null}" 
         KeyDown="Window_KeyDown"
         KeyUp="Window_KeyUp"
-        Loaded="Window_Loaded" 
-        Deactivated="Window_Deactivated"
+        Loaded="Window_Loaded"
+        Deactivated="Window_Deactivated" 
+        Activated="Window_Activated"
         FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}">
     <Window.Resources>
         <PathGeometry x:Key="WaitGeometry">
@@ -24,7 +25,6 @@
                 M512 0c-278.748 0-505.458 222.762-511.848 499.974 5.92-241.864 189.832-435.974 415.848-435.974 229.75 0 416 200.576 416 448 0 53.020 42.98 96 96 96 53.020 0 96-42.98 96-96 0-282.77-229.23-512-512-512zM512 1024c278.748 0 505.458-222.762 511.848-499.974-5.92 241.864-189.832 435.974-415.848 435.974-229.75 0-416-200.576-416-448 0-53.020-42.98-96-96-96-53.020 0-96 42.98-96 96 0 282.77 229.23 512 512 512z
             </PathGeometry.Figures>
         </PathGeometry>
-
         <Style x:Key="IconPath" TargetType="Path">
             <Setter Property="Fill" Value="#FFF" />
             <Setter Property="Stretch" Value="Uniform" />
@@ -58,12 +58,12 @@
     <Grid Name="MainGrid" 
           HorizontalAlignment="Left"
           Width="500" 
-          Height="80"
+          Height="80" 
           VerticalAlignment="Center">
         <Grid.Background>
             <ImageBrush ImageSource="Images/skin.png" Stretch="Uniform"/>
         </Grid.Background>
-        <TextBox HorizontalAlignment="Left" 
+        <TextBox HorizontalAlignment="Left"  
                  Height="48"
                  Width="127"
                  Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"

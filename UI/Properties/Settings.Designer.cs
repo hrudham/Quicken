@@ -22,5 +22,16 @@ namespace Quicken.UI.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime LastRefreshDate {
+            get {
+                return ((global::System.DateTime)(this["LastRefreshDate"]));
+            }
+            set {
+                this["LastRefreshDate"] = value;
+            }
+        }
     }
 }

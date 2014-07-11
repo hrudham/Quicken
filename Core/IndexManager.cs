@@ -29,7 +29,7 @@ namespace Quicken.Core.Index
 
         private bool _includeMetro = true;
         private HashSet<string> _directories;
-        private static TargetRepository _targetRepository = new TargetRepository();
+        private TargetRepository _targetRepository = new TargetRepository();
         private static IWshRuntimeLibrary.WshShell _shell = new IWshRuntimeLibrary.WshShell(); 
 
         #endregion
@@ -68,17 +68,6 @@ namespace Quicken.Core.Index
             this._directories.Add(Environment.ExpandEnvironmentVariables("%AppData%\\Microsoft\\Windows\\Start Menu"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%appdata%\\Microsoft\\Internet Explorer\\Quick Launch"));
             this._directories.Add(Environment.ExpandEnvironmentVariables("%homedrive%%homepath%\\Links"));
-
-            // If there are no targets when we start, automatically start looking for some.
-            if (!new TargetRepository().HasTargets())
-            {
-                new Thread(
-                    delegate()
-                    {
-                        this.UpdateIndex();
-                    })
-                    .Start();
-            }
         } 
 
         #endregion
@@ -92,7 +81,7 @@ namespace Quicken.Core.Index
         /// <returns></returns>
         public IList<Target> FindTargets(string text)
         {
-            return _targetRepository.FindTargets(text);
+            return this._targetRepository.FindTargets(text);
         }
 
         /// <summary>
@@ -102,7 +91,7 @@ namespace Quicken.Core.Index
         /// <param name="text">The text.</param>
         public void UpdateTermTarget(int targetId, string text)
         {
-            _targetRepository.UpdateTermTarget(targetId, text);
+            this._targetRepository.UpdateTermTarget(targetId, text);
         }
 
         /// <summary>
@@ -114,10 +103,7 @@ namespace Quicken.Core.Index
             var targets = this.GetDesktopTargets();
             targets = targets.Union(this.GetMetroTargets());
 
-            // Note that this method often gets run as a separate 
-            // thread, and since SQL CE is not inherently 
-            // thread-safe, it has it's own TargetRepository.
-            new TargetRepository().UpdateTargets(
+            this._targetRepository.UpdateTargets(
                 targets
                     .ToLookup(pair => pair.Path.ToUpperInvariant(), pair => pair)
                     .ToDictionary(group => group.Key, group => group.First())

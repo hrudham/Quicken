@@ -7,16 +7,12 @@ using Quicken.UI.OperatingSystem.Launcher;
 using Quicken.UI.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 
 namespace Quicken.UI
 {
@@ -29,19 +25,20 @@ namespace Quicken.UI
 
         private IndexManager _indexManager = new IndexManager();
         private IList<Target> _currentTargets = new List<Target>();
-
+        
         #endregion
 
-        #region Fields
+        #region Properties
 
         private MainWindowViewModel ViewModel { get; set; }
+        private BackgroundWorker RefreshBackgroundWorker { get; set; }
 
         #endregion
 
         #region Constructors 
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// Initializes a new instance of the <see cref="MainWindow" /> class.
         /// </summary>
         public MainWindow()
         {
@@ -50,6 +47,26 @@ namespace Quicken.UI
             this.DataContext = this.ViewModel;
 
             this.ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            this.RefreshBackgroundWorker = new BackgroundWorker() 
+            { 
+                WorkerReportsProgress = false, 
+                WorkerSupportsCancellation = false 
+            };
+
+            this.RefreshBackgroundWorker.DoWork += RefreshBackgroundWorker_DoWork;
+            this.RefreshBackgroundWorker.RunWorkerCompleted += RefreshBackgroundWorker_RunWorkerCompleted;
+
+            // Refresh the index once a week
+            if (Properties.Settings.Default.LastRefreshDate.Add(new TimeSpan(7, 0, 0, 0)) < DateTime.Now)
+            {
+                this.Refresh();
+                
+                Properties.Settings.Default.LastRefreshDate = DateTime.Now;
+                Properties.Settings.Default.Save();
+            }
+
+            this.HideWindow();
         }
 
         /// <summary>
@@ -57,7 +74,7 @@ namespace Quicken.UI
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
-        void ViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Query")
             {
@@ -130,11 +147,21 @@ namespace Quicken.UI
                     this.AdjustCurrentTarget(false);
                     break;
                 case Key.F5:
-                    this.Update();
+                    this.Refresh();
                     break;
                 default:
                     break;
             }
+        }
+
+        /// <summary>
+        /// Handles the Activated event of the Window control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            Keyboard.Focus(this.SearchTextBox);
         }
 
         /// <summary>
@@ -157,6 +184,28 @@ namespace Quicken.UI
             this.HideWindow();
         }
 
+        /// <summary>
+        /// Handles the DoWork event of the RefreshBackgroundWorker control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="DoWorkEventArgs"/> instance containing the event data.</param>
+        private void RefreshBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            this.ViewModel.IsUpdating = true;
+            new IndexManager().UpdateIndex();
+        }
+
+        /// <summary>
+        /// Handles the RunWorkerCompleted event of the RefreshBackgroundWorker control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="RunWorkerCompletedEventArgs"/> instance containing the event data.</param>
+        /// <exception cref="System.NotImplementedException"></exception>
+        private void RefreshBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.ViewModel.IsUpdating = false;
+        }
+
         #endregion
 
         #region Methods
@@ -164,18 +213,11 @@ namespace Quicken.UI
         /// <summary>
         /// Updates this instance.
         /// </summary>
-        private void Update()
+        private void Refresh()
         {
-            if (!this.ViewModel.IsUpdating)
+            if (!this.RefreshBackgroundWorker.IsBusy)
             {
-                new Thread(
-                    delegate()
-                    {
-                        this.ViewModel.IsUpdating = true;
-                        this._indexManager.UpdateIndex();
-                        this.ViewModel.IsUpdating = false;
-                    })
-                    .Start();
+                this.RefreshBackgroundWorker.RunWorkerAsync();
             }
         }
 
@@ -219,25 +261,7 @@ namespace Quicken.UI
             this.SearchTextBox.SelectAll();
             this.Hide();
         }
-
-        /// <summary>
-        /// Displays this window in a state that is ready for a new search.
-        /// </summary>
-        public void Display()
-        {
-            // Re-center the application every time it's shown, and make sure it's always on the primary screen.
-            // If we just use the Window's start up position, it sometimes ends up on secondary screens.
-            this.Left = (SystemParameters.PrimaryScreenWidth / 2) - (this.Width / 2);
-            this.Top = (SystemParameters.PrimaryScreenHeight / 2) - (this.Height / 2);
-
-            if (!this.IsVisible)
-            {
-                this.Show();
-            }
-
-            this.Activate();
-        }
-
+        
         /// <summary>
         /// Sets the target.
         /// </summary>
