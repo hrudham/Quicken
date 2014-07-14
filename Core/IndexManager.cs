@@ -153,13 +153,21 @@ namespace Quicken.Core.Index
 
                         if (target != null)
                         {
-                            //Add generic alias information
+                            // Add generic alias information
                             target.AddAlias(target.Name);
 
-                            var abbreviation = target.Name.GetAbbreviation();
-                            if (abbreviation.Length > 1)
+                            // Add abbreviated alias information. E.g.: "Visual Studio 2012" becomes "VS2"
+                            var abbr = target.Name.GetAbbreviation(true);
+                            if (abbr.Length > 1)
                             {
-                                target.AddAlias(abbreviation);
+                                target.AddAlias(abbr);
+                            }
+
+                            // Add abbreviated alias information, with whole numbers. E.g.: "Visual Studio 2012" becomes "VS2012"
+                            var abbrWholeNumbers = target.Name.GetAbbreviation(false);
+                            if (abbrWholeNumbers.Length > 1)
+                            {
+                                target.AddAlias(abbrWholeNumbers);
                             }
 
                             target.AddAlias(GetPathAliasText(target.Path));

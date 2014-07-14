@@ -3,6 +3,7 @@ using Quicken.UI.OperatingSystem;
 using Quicken.UI.OperatingSystem.HotKey;
 using System;
 using System.Windows;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Quicken.UI
@@ -15,16 +16,9 @@ namespace Quicken.UI
         #region Fields
 
         private TaskbarIcon _taskBarIcon;
-        private MainWindow _mainWindow = new MainWindow();
 
         #endregion
-
-        #region Events
-
-        public static event EventHandler MainWindowShown;
-
-        #endregion
-
+        
         #region Event Handlers
 
         protected override void OnStartup(StartupEventArgs e)
@@ -32,7 +26,13 @@ namespace Quicken.UI
             base.OnStartup(e);
             
             // Create a new instance of the main window.
-            Application.Current.MainWindow = _mainWindow;
+            var mainWindow = new MainWindow();
+            Application.Current.MainWindow = mainWindow;
+
+            if (e.Args.Any(arg => arg.ToUpper().Equals("/refresh")))
+            {
+                mainWindow.Refresh();
+            }
 
             //create the notifyicon (it's a resource declared in SystemTray/SystemTrayResources.xaml).
             _taskBarIcon = (TaskbarIcon)FindResource("SystemTrayIcon");
@@ -60,18 +60,6 @@ namespace Quicken.UI
         {
             _taskBarIcon.Dispose(); //the icon would clean up automatically, but this is cleaner.
             base.OnExit(e);
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Shows the main window.
-        /// </summary>
-        public static void ShowMainWindow()
-        {
-            MainWindowShown(App.Current, null);
         }
 
         #endregion

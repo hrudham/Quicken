@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Quicken.Core.Index.Extensions
@@ -38,7 +39,35 @@ namespace Quicken.Core.Index.Extensions
         /// <returns></returns>
         public static string GetAbbreviation(this string source)
         {
-            return new string(source.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray());
+            return source.GetAbbreviation(false);
+        }
+
+        /// <summary>
+        /// Gets the abbreviation.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="abbreviateNumbers">if set to <c>true</c> [abbreviate numbers].</param>
+        /// <returns></returns>
+        public static string GetAbbreviation(this string source, bool abbreviateNumbers)
+        {
+            var numberRegex = new Regex("\\d+(\\.\\d+)?");
+
+            var words = source.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var resultStringBuilder = new StringBuilder();
+
+            foreach(var word in words)
+            {
+                string abbrChararcter = word.Substring(0, 1);
+
+                if (!abbreviateNumbers && numberRegex.IsMatch(word))
+                {
+                    abbrChararcter = word;
+                }
+
+                resultStringBuilder.Append(abbrChararcter);
+            }
+
+            return resultStringBuilder.ToString();
         }
     }
 }

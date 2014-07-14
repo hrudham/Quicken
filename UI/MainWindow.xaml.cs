@@ -213,7 +213,7 @@ namespace Quicken.UI
         /// <summary>
         /// Updates this instance.
         /// </summary>
-        private void Refresh()
+        internal void Refresh()
         {
             if (!this.RefreshBackgroundWorker.IsBusy)
             {
