@@ -4,6 +4,7 @@
         Title="Quicken" 
         Width="500" 
         Height="80"
+        Topmost="True"
         WindowStartupLocation="CenterScreen" 
         AllowsTransparency="True"
         WindowStyle="None" 
