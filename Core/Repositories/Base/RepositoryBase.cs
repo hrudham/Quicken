@@ -13,7 +13,7 @@ namespace Quicken.Core.Index.Repositories.Base
         #region Properties
 
         /// <summary>
-        /// Gets the strongly typed OpenLeaseContext for the repository
+        /// Gets the strongly typed DataContext for the repository
         /// </summary>
         protected DataContext DataContext
         {

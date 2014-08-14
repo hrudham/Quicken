@@ -1,25 +1,17 @@
 ﻿using Core.Icons;
 using Core.Lnk;
+using Core.Metro;
 using Quicken.Core.Index.Entities;
 using Quicken.Core.Index.Entities.Models;
+using Quicken.Core.Index.Enumerations;
+using Quicken.Core.Index.Extensions;
 using Quicken.Core.Index.Repositories;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Principal;
-using System.Reflection;
-using Core.Metro;
-using Quicken.Core.Index.Enumerations;
-using Quicken.Core.Index.Extensions;
-using System.Threading;
 
 namespace Quicken.Core.Index
 {

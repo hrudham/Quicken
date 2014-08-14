@@ -1,19 +1,26 @@
-﻿using Quicken.Core.Index.Entities;
-using Quicken.Core.Index.Entities.Models;
+﻿using Quicken.Core.Index.Entities.Models;
 using Quicken.Core.Index.Repositories.Base;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Quicken.Core.Index.Extensions;
 
 namespace Quicken.Core.Index.Repositories
 {
     internal class TargetRepository : RepositoryBase
     {
+        #region Constructors
+
+        public TargetRepository()
+        {
+            // Perform a basic query to load the EF meta-data, and thus make sure that the first query is not super slow
+            // http://stackoverflow.com/questions/3891125/entity-framework-first-query-slow
+            this.DataContext.Database.ExecuteSqlCommand("SELECT GETDATE()", new object[0]);
+        }
+
+        #endregion
+
+        #region Methods
+
         /// <summary>
         /// Updates the targets.
         /// </summary>
@@ -26,10 +33,10 @@ namespace Quicken.Core.Index.Repositories
                 from i in input
                 join e in existing on i.Path equals e.Path into m
                 from e in m.DefaultIfEmpty()
-                select new 
-                { 
-                    current = e, 
-                    changed = i 
+                select new
+                {
+                    current = e,
+                    changed = i
                 };
 
             foreach (var item in merge)
@@ -73,9 +80,9 @@ namespace Quicken.Core.Index.Repositories
                     foreach (var newAlias in newAliases)
                     {
                         item.current.Aliases.Add(
-                            new Alias() 
-                            { 
-                                Text = newAlias.Text 
+                            new Alias()
+                            {
+                                Text = newAlias.Text
                             });
                     }
                 }
@@ -115,7 +122,7 @@ namespace Quicken.Core.Index.Repositories
                             alias.Text.IndexOf(" " + text.ToUpper()) >= 0)
                     .Select(alias => alias.Target)
                     .OrderByDescending(
-                        target => 
+                        target =>
                             target.Terms
                                 .Max(
                                     term =>
@@ -127,7 +134,7 @@ namespace Quicken.Core.Index.Repositories
                 return results;
             }
 
-            return new List<Target>();           
+            return new List<Target>();
         }
 
         /// <summary>
@@ -197,6 +204,8 @@ namespace Quicken.Core.Index.Repositories
                             t.TargetId == targetId));
 
             this.DataContext.SaveChanges();
-        }
+        } 
+
+        #endregion
     }
 }
